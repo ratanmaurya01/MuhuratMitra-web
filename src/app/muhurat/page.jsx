@@ -40,7 +40,7 @@ import {
   getMuhuratResult,
   getMuhuratDateComparisons,
 } from "@/lib/muhurat";
-
+import { MuhuratHeader } from "@/components/muhurat/MuhuratHeader";
 // -------------------- Constants --------------------
 
 const CATEGORIES = [
@@ -185,8 +185,8 @@ function getScoreColor(score) {
 
 function StepProgress({ step }) {
   return (
-    <div className="mb-8">
-      <div className="mb-3 flex items-center justify-between gap-2">
+    <div className="mb-2">
+      <div className="mb-1 flex items-center justify-between gap-2">
         {STEP_LABELS.map((label, index) => {
           const number = index + 1;
           const completed = number < step;
@@ -198,7 +198,7 @@ function StepProgress({ step }) {
               className="flex min-w-0 flex-1 flex-col items-center gap-2"
             >
               <div
-                className={`flex size-9 items-center justify-center rounded-full text-xs font-semibold ${
+                className={`flex size-7 items-center justify-center rounded-full text-xs font-semibold ${
                   completed
                     ? "bg-primary text-primary-foreground"
                     : active
@@ -220,7 +220,6 @@ function StepProgress({ step }) {
           );
         })}
       </div>
-
       <div className="h-1.5 overflow-hidden rounded-full bg-muted">
         <div
           className="h-full rounded-full bg-primary transition-all duration-300"
@@ -237,7 +236,6 @@ function ScoreRing({ score }) {
   const radius = 62;
   const circumference = 2 * Math.PI * radius;
   const progress = (score / 100) * circumference;
-
   return (
     <div className="relative flex size-44 items-center justify-center">
       <svg
@@ -254,7 +252,6 @@ function ScoreRing({ score }) {
           className="stroke-muted"
           strokeWidth="11"
         />
-
         <circle
           cx="80"
           cy="80"
@@ -528,52 +525,37 @@ export default function MuhuratPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <section className="border-b border-border bg-card">
-        <div className="mx-auto max-w-7xl px-5 py-10 sm:py-14 lg:px-8">
-          <p className="mb-3 text-sm font-semibold tracking-wide text-primary">
-            PERSONALIZED MUHURAT FINDER
-          </p>
+     
 
-          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            शुभ मुहूर्त खोजें
-          </h1>
+       <MuhuratHeader/>
 
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-            अपने शुभ कार्य के लिए तारीख, शहर और समय का mock Panchang
-            analysis देखें।
-          </p>
-        </div>
-      </section>
 
-      <section className="mx-auto max-w-5xl px-5 py-8 lg:px-8">
+
+      <section className="mx-auto max-w-5xl p-2">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-8">
           <StepProgress step={step} />
-
           {/* STEP 1 */}
           {step === 1 && (
             <div>
               <div className="mb-6">
                 <h2 className="text-xl font-bold text-foreground">
-                  किस कार्य के लिए मुहूर्त चाहिए?
+                  
                 </h2>
 
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Category चुनें और अपना specific event select करें।
-                </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 {CATEGORIES.map((item) => {
                   const Icon = item.icon;
                   const active = category === item.id;
-
                   return (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => handleCategoryChange(item.id)}
                       aria-pressed={active}
-                      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium transition-colors ${
+                      className={`inline-flex items-center gap-2 rounded-full border px-2
+                         py-2 text-sm font-medium transition-colors ${
                         active
                           ? "border-primary bg-saffron-light text-primary"
                           : "border-border text-muted-foreground hover:border-primary hover:text-primary"
@@ -586,7 +568,7 @@ export default function MuhuratPage() {
                 })}
               </div>
 
-              <div className="relative mt-7 max-w-lg">
+              <div className="relative mt-2 max-w-lg">
                 <Search
                   size={18}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"

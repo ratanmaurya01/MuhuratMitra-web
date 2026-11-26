@@ -1,6 +1,7 @@
 
+
 export const CITIES = [
-    { value: "all", label: "सभी शहर" },
+    { value: "All", label: "All City" },
     { value: "Jaipur", label: "Jaipur" },
     { value: "Delhi", label: "Delhi" },
     { value: "Varanasi", label: "Varanasi" },

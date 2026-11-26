@@ -11,6 +11,10 @@ import {
   Flower2,
   IndianRupee,
   PackageCheck,
+  UserRoundArrowLeft,
+  UserRoundArrowLeftIcon,
+  UserSearch,
+  UserSearchIcon,
 } from "lucide-react";
 import { getPuja } from "@/lib/api";
 
@@ -28,24 +32,20 @@ function DetailSkeleton() {
   );
 }
 
-export default function PujaDetailPage({ id }) {
-  
 
+
+export default function PujaDetailPage({ id }) {
   const [puja, setPuja] = useState(null);
   const [loading, setLoading] = useState(true);
   const [checkedItems, setCheckedItems] = useState([]);
-
   useEffect(() => {
     let isActive = true;
-
     async function loadPuja() {
       setLoading(true);
       setPuja(null);
       setCheckedItems([]);
-
       try {
         const result = await getPuja(id);
-
         if (isActive) {
           setPuja(result);
         }
@@ -61,9 +61,7 @@ export default function PujaDetailPage({ id }) {
         }
       }
     }
-
     loadPuja();
-
     return () => {
       isActive = false;
     };
@@ -110,6 +108,7 @@ export default function PujaDetailPage({ id }) {
     );
   }
 
+
   return (
     <main className="min-h-screen bg-background pb-28">
       <div className="mx-auto max-w-7xl px-5 py-8 lg:px-8">
@@ -129,11 +128,9 @@ export default function PujaDetailPage({ id }) {
           <h1 className="mt-5 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {puja.nameHindi || puja.name}
           </h1>
-
           {puja.nameHindi && (
             <p className="mt-1 text-sm text-muted-foreground">{puja.name}</p>
           )}
-
           <p className="mt-4 max-w-3xl leading-7 text-muted-foreground">
             {puja.description}
           </p>
@@ -151,7 +148,8 @@ export default function PujaDetailPage({ id }) {
           </div>
         </section>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+        <h1 className="mt-4">Puja Vidhi (Step-by-step)</h1>
+        <div className=" grid gap-6 lg:grid-cols-2">
           <section className="rounded-2xl border border-border bg-card p-6 sm:p-7">
             <div className="mb-6 flex items-center gap-3">
               <span className="flex size-10 items-center justify-center rounded-xl bg-saffron-light text-primary">
@@ -186,6 +184,7 @@ export default function PujaDetailPage({ id }) {
               </p>
             )}
           </section>
+
 
           <section className="rounded-2xl border border-border bg-card p-6 sm:p-7">
             <div className="mb-6 flex items-center gap-3">
@@ -235,11 +234,10 @@ export default function PujaDetailPage({ id }) {
                   return (
                     <li key={`${index}-${item}`}>
                       <label
-                        className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors ${
-                          isChecked
-                            ? "border-primary/30 bg-saffron-light"
-                            : "border-border hover:bg-muted/50"
-                        }`}
+                        className={`flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors ${isChecked
+                          ? "border-primary/30 bg-saffron-light"
+                          : "border-border hover:bg-muted/50"
+                          }`}
                       >
                         <input
                           type="checkbox"
@@ -249,22 +247,20 @@ export default function PujaDetailPage({ id }) {
                         />
 
                         <span
-                          className={`flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
-                            isChecked
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-input bg-background"
-                          }`}
+                          className={`flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors ${isChecked
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-input bg-background"
+                            }`}
                           aria-hidden="true"
                         >
                           {isChecked && <Check size={14} />}
                         </span>
 
                         <span
-                          className={`text-sm ${
-                            isChecked
-                              ? "text-muted-foreground line-through"
-                              : "text-foreground"
-                          }`}
+                          className={`text-sm ${isChecked
+                            ? "text-muted-foreground line-through"
+                            : "text-foreground"
+                            }`}
                         >
                           {item}
                         </span>
@@ -300,12 +296,15 @@ export default function PujaDetailPage({ id }) {
             </p>
           </div>
 
+
           <Link
             href={`/pandits?puja=${encodeURIComponent(puja.id)}`}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-saffron-dark sm:ml-auto sm:w-auto"
           >
-            Pandit बुक करें
-            <ArrowLeft className="rotate-180" size={17} aria-hidden="true" />
+          <UserSearchIcon size={17} />
+
+           Book Pandit For This Puja
+           
           </Link>
         </div>
       </div>

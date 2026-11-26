@@ -1,8 +1,6 @@
-
-
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -19,6 +17,7 @@ import {
   LoaderCircle,
   Flower2,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const loginSchema = z.object({
   email: z
@@ -35,10 +34,11 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter();
-
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState("");
+
+  const { login, isAuthenticated, loading, user, getRedirectPath } = useAuth();
 
   const {
     register,
@@ -52,33 +52,33 @@ export default function LoginPage() {
     },
   });
 
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      router.replace(getRedirectPath(user));
+    }
+  }, [loading, isAuthenticated, user, getRedirectPath, router]);
+
+
   const onSubmit = async (values) => {
     setIsSubmitting(true);
     setLoginError("");
 
     try {
-      // Mock login: no real authentication is performed.
-      const email = values.email.trim().toLowerCase();
-      const isAdmin = email === "admin@muhuratmitra.com";
+      const result = await login({
+        email: values.email,
+        password: values.password,
+      });
 
-      const mockUser = {
-        id: isAdmin ? "ADMIN001" : `USER_${Date.now()}`,
-        name: isAdmin ? "Admin" : email.split("@")[0],
-        email,
-        role: isAdmin ? "ADMIN" : "USER",
-      };
-
-      localStorage.setItem(
-        "muhuratmitra_user",
-        JSON.stringify(mockUser)
-      );
-
-      router.replace(isAdmin ? "/admin" : "/");
+      router.replace(result.redirectTo);
     } catch (error) {
-      setLoginError("Something went wrong. Please try again.");
+      setLoginError(
+        error.message || "Invalid email or password."
+      );
+    } finally {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <main className="min-h-[calc(100vh-5rem)] bg-background">
@@ -196,9 +196,8 @@ export default function LoginPage() {
                   Email Address
                 </label>
 
-                <div className={`flex h-12 items-center gap-3 rounded-lg border bg-background px-3 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 ${
-                  errors.email ? "border-destructive" : "border-input"
-                }`}>
+                <div className={`flex h-12 items-center gap-3 rounded-lg border bg-background px-3 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 ${errors.email ? "border-destructive" : "border-input"
+                  }`}>
                   <Mail
                     size={18}
                     className="shrink-0 text-muted-foreground"
@@ -239,9 +238,8 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                <div className={`flex h-12 items-center gap-3 rounded-lg border bg-background px-3 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 ${
-                  errors.password ? "border-destructive" : "border-input"
-                }`}>
+                <div className={`flex h-12 items-center gap-3 rounded-lg border bg-background px-3 transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 ${errors.password ? "border-destructive" : "border-input"
+                  }`}>
                   <LockKeyhole
                     size={18}
                     className="shrink-0 text-muted-foreground"

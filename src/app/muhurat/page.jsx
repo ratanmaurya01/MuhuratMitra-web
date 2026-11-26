@@ -34,7 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { CITIES } from "@/lib/constants/cities";
+import { CITIES } from "@/constants/cities";
 
 import {
   getMuhuratResult,

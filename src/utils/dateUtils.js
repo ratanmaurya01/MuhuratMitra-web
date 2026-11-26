@@ -1,4 +1,4 @@
-
+"use client"
 
 export function getLocalDateString() {
     const date = new Date();

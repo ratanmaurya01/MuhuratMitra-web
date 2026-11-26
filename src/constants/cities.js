@@ -1,5 +1,3 @@
-
-
 export const CITIES = [
     { value: "All", label: "All City" },
     { value: "Jaipur", label: "Jaipur" },

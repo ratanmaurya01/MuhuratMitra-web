@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarDays,
   Flower2,
@@ -10,8 +10,13 @@ import {
   Menu,
   Users,
   X,
+  UserRound,
+  LogOut,
+  LayoutDashboard,
+  ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const NAV_ITEMS = [
   { name: "Home", href: "/", icon: Home },
@@ -28,7 +33,61 @@ function isActiveRoute(pathname, href) {
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  // Centralized authentication
+  const {
+    user,
+    loading,
+    isAuthenticated,
+    logout,
+  } = useAuth();
+
+  // Role-based dashboard
+  const role = user?.role;
+
+  const dashboardPath =
+    role === "ADMIN"
+      ? "/admin/dashboard"
+      : role === "PANDIT"
+        ? "/pandit/dashboard"
+        : "/account";
+
+  const dashboardLabel =
+    role === "ADMIN"
+      ? "Admin Dashboard"
+      : role === "PANDIT"
+        ? "Pandit Dashboard"
+        : "My Account";
+
+  // Logout
+  const handleLogout = () => {
+    logout();
+
+    setProfileOpen(false);
+    setMenuOpen(false);
+
+    router.replace("/");
+  };
+
+  // Close menus on route change
+  const closeMenus = () => {
+    setMenuOpen(false);
+    setProfileOpen(false);
+  };
+
+  // Hide global navbar on account pages
+  // const hideNavbar =
+  //   pathname === "/account" ||
+  //   pathname.startsWith("/account/") ||
+  //   pathname === "/pandits/account" ||
+  //   pathname.startsWith("/pandit/account/");
+
+  // if (hideNavbar) return null;
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md">
@@ -37,6 +96,7 @@ export default function Navbar() {
         {/* Brand */}
         <Link
           href="/"
+          onClick={closeMenus}
           className="flex shrink-0 items-center gap-2"
           aria-label="MuhuratMitra Home"
         >
@@ -62,11 +122,10 @@ export default function Navbar() {
                 key={href}
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-2 text-sm font-medium transition-colors ${
-                  active
+                className={`flex items-center gap-2 text-sm font-medium transition-colors ${active
                     ? "text-primary"
                     : "text-muted-foreground hover:text-primary"
-                }`}
+                  }`}
               >
                 <Icon size={17} aria-hidden="true" />
                 {name}
@@ -76,19 +135,101 @@ export default function Navbar() {
         </nav>
 
         {/* Desktop Actions */}
-        <div className="hidden items-center gap-3 md:flex">
-          <Link
-            href="/login"
-            className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
-          >
-            Login
-          </Link>
+        <div className="relative hidden items-center md:flex">
+
+          {loading ? (
+            <div className="h-10 w-24 animate-pulse rounded-lg bg-muted" />
+          ) : !isAuthenticated ? (
+            <Link
+              href="/login"
+              className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              Login
+            </Link>
+          ) : (
+            <div className="relative">
+
+              {/* Profile Button */}
+              <button
+                type="button"
+                onClick={() =>
+                  setProfileOpen((prev) => !prev)
+                }
+                className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 transition hover:border-primary"
+                aria-expanded={profileOpen}
+                aria-label="Open account menu"
+              >
+                <span className="flex size-9 items-center justify-center rounded-full bg-saffron-light text-primary">
+                  <UserRound size={19} />
+                </span>
+
+                <span className="max-w-32 text-left">
+                  <span className="block truncate text-sm font-semibold">
+                    {user?.name || "My Account"}
+                  </span>
+
+                  <span className="block text-xs text-muted-foreground">
+                    {dashboardLabel}
+                  </span>
+                </span>
+
+                <ChevronDown
+                  size={16}
+                  className={`transition-transform ${profileOpen ? "rotate-180" : ""
+                    }`}
+                />
+              </button>
+
+              {/* Profile Dropdown */}
+              {profileOpen && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Close account menu"
+                    className="fixed inset-0 z-40 cursor-default"
+                    onClick={() => setProfileOpen(false)}
+                  />
+
+                  <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-border bg-background p-2 shadow-xl">
+
+                    <div className="border-b border-border px-3 py-2.5">
+                      <p className="truncate text-sm font-semibold">
+                        {user?.name}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {user?.email}
+                      </p>
+                    </div>
+
+                    <Link
+                      href={dashboardPath}
+                      onClick={() => setProfileOpen(false)}
+                      className="mt-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors hover:bg-muted"
+                    >
+                      <LayoutDashboard size={17} />
+                      {dashboardLabel}
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-destructive transition-colors hover:bg-destructive/10"
+                    >
+                      <LogOut size={17} />
+                      Logout
+                    </button>
+
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
         <button
           type="button"
-          onClick={() => setMenuOpen((previous) => !previous)}
+          onClick={() => setMenuOpen((prev) => !prev)}
           className="rounded-lg border border-border p-2 text-foreground transition-colors hover:bg-muted md:hidden"
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
@@ -106,6 +247,8 @@ export default function Navbar() {
           className="border-t border-border bg-background px-5 py-4 md:hidden"
         >
           <div className="mx-auto flex max-w-7xl flex-col gap-2">
+
+            {/* Mobile Nav Links */}
             {NAV_ITEMS.map(({ name, href, icon: Icon }) => {
               const active = isActiveRoute(pathname, href);
 
@@ -113,19 +256,69 @@ export default function Navbar() {
                 <Link
                   key={href}
                   href={href}
-                  onClick={() => setMenuOpen(false)}
+                  onClick={closeMenus}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                    active
+                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${active
                       ? "bg-saffron-light text-primary"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   <Icon size={19} aria-hidden="true" />
                   {name}
                 </Link>
               );
             })}
+
+            {/* Mobile Authentication */}
+            {loading ? (
+              <div className="mt-2 h-11 animate-pulse rounded-lg bg-muted" />
+            ) : !isAuthenticated ? (
+              <Link
+                href="/login"
+                onClick={closeMenus}
+                className="mt-2 rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+              >
+                Login
+              </Link>
+            ) : (
+              <>
+                {/* User Details */}
+                <div className="mt-3 flex items-center gap-3 rounded-xl border border-border p-3">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-saffron-light text-primary">
+                    <UserRound size={20} />
+                  </span>
+
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">
+                      {user?.name || "My Account"}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {dashboardLabel}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Dashboard */}
+                <Link
+                  href={dashboardPath}
+                  onClick={closeMenus}
+                  className="mt-2 flex items-center gap-3 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
+                >
+                  <LayoutDashboard size={18} />
+                  {dashboardLabel}
+                </Link>
+
+                {/* Logout */}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-destructive transition-colors hover:bg-destructive/10"
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              </>
+            )}
           </div>
         </nav>
       )}

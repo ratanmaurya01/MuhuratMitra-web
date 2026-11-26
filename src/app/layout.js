@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
 
 import { Fraunces, DM_Sans, Noto_Sans_Devanagari } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -38,7 +39,6 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="hi">
-
       <body
         className={`
     ${fraunces.variable}
@@ -47,16 +47,16 @@ export default function RootLayout({ children }) {
     min-h-screen bg-background text-foreground antialiased
   `}
       >
-
-        <Suspense
-          fallback={
-            <div className="h-20 w-full border-b border-border bg-background" />
-          }
-        >
-          <Navbar />
-        </Suspense>
-
-        <main className="w-full">{children}</main>
+        <AuthProvider>
+          <Suspense
+            fallback={
+              <div className="h-20 w-full border-b border-border bg-background" />
+            }
+          >
+            <Navbar />
+          </Suspense>
+          <main className="w-full">{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

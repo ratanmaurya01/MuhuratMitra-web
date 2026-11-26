@@ -48,7 +48,7 @@ import {
     getPandits,
     getPujas,
 } from "@/lib/api";
-import { CITIES } from "@/lib/constants/cities";
+import { CITIES } from "@/constants/cities";
 import PanditCard from "@/components/pandit/PanditCard";
 import PanditBookingDialog from "@/components/pandit/PanditBookingDialog";
 import { getLocalDateString } from "@/utils/dateUtils";

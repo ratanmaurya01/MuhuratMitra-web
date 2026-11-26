@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState } from "react";
@@ -21,24 +19,37 @@ import {
   CalendarDays,
   CheckCircle2,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+
+
+
 
 const registerSchema = z
   .object({
+    accountType: z.enum(["DEVOTEE", "PANDIT"]),
+
     name: z
       .string()
       .trim()
       .min(2, "Name must be at least 2 characters"),
+
     email: z
       .string()
       .trim()
       .email("Please enter a valid email address"),
+
     phone: z
       .string()
       .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number"),
+
     password: z
       .string()
       .min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
+
+    confirmPassword: z
+      .string()
+      .min(1, "Please confirm your password"),
+
     terms: z.boolean().refine((value) => value === true, {
       message: "Please accept the Terms and Conditions",
     }),
@@ -48,8 +59,11 @@ const registerSchema = z
     path: ["confirmPassword"],
   });
 
+
+
 const inputClass =
   "w-full rounded-xl border border-input bg-background py-3 pl-11 pr-4 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/10";
+
 
 function FormField({
   label,
@@ -70,7 +84,6 @@ function FormField({
         />
         {children}
       </div>
-
       {error && (
         <p className="text-xs text-destructive">{error.message}</p>
       )}
@@ -78,11 +91,15 @@ function FormField({
   );
 }
 
+
 export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  const { register: createAccount } = useAuth();
+
 
   const {
     register,
@@ -91,6 +108,7 @@ export default function RegisterPage() {
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+      accountType: "DEVOTEE",
       name: "",
       email: "",
       phone: "",
@@ -102,27 +120,36 @@ export default function RegisterPage() {
 
   const onSubmit = async (values) => {
     setSubmitError("");
-
     try {
-      // Demo registration: replace with your registration API.
-      const existingUser = {
-        id: `USER_${Date.now()}`,
-        name: values.name.trim(),
-        email: values.email.trim().toLowerCase(),
-        phone: values.phone,
-        role: "USER",
-        createdAt: new Date().toISOString(),
-      };
-      localStorage.setItem(
-        "muhuratmitra_user",
-        JSON.stringify(existingUser)
-      );
-
-      router.replace("/");
+      const result = await createAccount(values);
+      router.replace(result.redirectTo);
+      // const newUser = {
+      //   id: `USER_${Date.now()}`,
+      //   name: values.name.trim(),
+      //   email: values.email.trim().toLowerCase(),
+      //   phone: values.phone,
+      //   role: values.accountType,
+      //   status:
+      //     values.accountType === "PANDIT"
+      //       ? "PENDING"
+      //       : "ACTIVE",
+      //   createdAt: new Date().toISOString(),
+      // };
+      // // Demo only: replace with backend registration API.
+      // localStorage.setItem(
+      //   "muhuratmitra_user",
+      //   JSON.stringify(newUser)
+      // );
+      // if (newUser.role === "PANDIT") {
+      //   router.replace("/pandit/pending-approval");
+      // } else {
+      //   router.replace("/");
+      // }
     } catch {
       setSubmitError("Something went wrong. Please try again.");
     }
   };
+
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-background">
@@ -203,6 +230,7 @@ export default function RegisterPage() {
         </section>
 
         {/* Registration Form */}
+
         <section className="flex items-center justify-center px-5 py-10 sm:px-8 lg:px-12">
           <div className="w-full max-w-md">
             {/* Mobile Branding */}
@@ -231,6 +259,59 @@ export default function RegisterPage() {
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+
+
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-foreground">
+                  Select Account Type
+                </label>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="cursor-pointer">
+                    <input
+                      type="radio"
+                      value="DEVOTEE"
+                      {...register("accountType")}
+                      className="peer sr-only"
+                    />
+
+                    <div className="rounded-xl border border-border p-4 transition peer-checked:border-primary peer-checked:bg-primary/5">
+                      <User className="mb-2 text-primary" size={22} />
+
+                      <p className="font-semibold text-sm">
+                        Devotee
+                      </p>
+
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Explore Panchang & book Pujas
+                      </p>
+                    </div>
+                  </label>
+
+                  <label className="cursor-pointer">
+                    <input
+                      type="radio"
+                      value="PANDIT"
+                      {...register("accountType")}
+                      className="peer sr-only"
+                    />
+
+                    <div className="rounded-xl border border-border p-4 transition peer-checked:border-primary peer-checked:bg-primary/5">
+                      <Sparkles className="mb-2 text-primary" size={22} />
+
+                      <p className="font-semibold text-sm">
+                        Pandit
+                      </p>
+
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Offer services & manage bookings
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+
               <FormField
                 label="Full Name"
                 icon={User}

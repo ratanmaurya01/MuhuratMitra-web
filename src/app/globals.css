@@ -90,6 +90,7 @@
 
   --radius: 0.75rem;
 }
+
 /* ========================================
    DARK THEME
 ======================================== */
@@ -190,3 +191,15 @@
     font-weight: 600;
   }
 }
+
+
+/* Horizontal scrollbar hidden but scrolling enabled */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+

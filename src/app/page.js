@@ -21,18 +21,12 @@ export default async function HomePage() {
       ? festivalsResult.value.slice(0, 3)
       : [];
 
-  const today = new Date().toLocaleDateString("hi-IN", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Asia/Kolkata",
-  });
+ 
 
   return (
     <main className="min-h-screen bg-[#FFFCF5] text-[#3F211B]">
       <div className="mx-auto w-full max-w-[1440px] space-y-10 px-4 py-5 sm:space-y-12 sm:px-6 sm:py-8 lg:px-10">
-        <WelcomeHero today={today} citySelect={<CitySelect initialCity={panchang?.city || "Jaipur"} />} />
+        <WelcomeHero  citySelect={<CitySelect initialCity={panchang?.city || "Jaipur"} />} />
         <QuickActions />
         <PanchangSection panchang={panchang} festivals={festivals} />
         <UpcomingVrats />

@@ -14,13 +14,9 @@ export async function getPanchang(city = "Jaipur") {
   };
 }
 
-
 export async function getFestivals() {
   return [...upcomingFestivals];
 }
-
-
-
 
 export async function getPujas(q = "") {
   await delay();
@@ -111,14 +107,10 @@ export async function getPandits(filters = {}) {
   });
 }
 
-
 export async function getMonthPanchang(year, month) {
   await delay();
   return getMonthPanchangMock(year, month);
 }
-
-
-
 
 export async function createBooking(data) {
   await delay(500);
@@ -130,11 +122,6 @@ export async function createBooking(data) {
     ...data,
   };
 }
-
-
-
-
-
 
 export async function askAssistant(question) {
   const query = question.trim().toLowerCase();
@@ -202,10 +189,6 @@ export async function askAssistant(question) {
 
   return "Aapka sawal achha hai. Main abhi ek demo Puja Assistant hoon aur meri knowledge limited mock responses par based hai. Aap Ganesh Puja, Satyanarayan Puja, Lakshmi Puja, Griha Pravesh, Rudrabhishek, Ekadashi ya Rahu Kaal ke baare mein pooch sakte hain. Dharmik vidhi aur exact muhurat ko local Panchang ya experienced pandit se verify zaroor karein.";
 }
-
-
-
-
 
 const bookingDelay = (ms = 300) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -286,3 +269,39 @@ export async function rescheduleBooking(id, date, time) {
 
   return updatedBooking;
 }
+
+
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8100/api/v1";
+
+
+
+  export const apiCall = async ({
+  endpoint,
+  method = "GET",
+  data = null,
+  headers = {},
+}) => {
+  try {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+      credentials: "include",
+      ...(data && { body: JSON.stringify(data) }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || result.success === false) {
+      throw new Error(result.message || "Something went wrong");
+    }
+
+    return result;
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
+};

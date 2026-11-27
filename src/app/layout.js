@@ -2,9 +2,8 @@
 import "./globals.css";
 import { Suspense } from "react";
 import Navbar from "@/components/Navbar";
-
 import { Fraunces, DM_Sans, Noto_Sans_Devanagari } from "next/font/google";
-import { AuthProvider } from "@/context/AuthContext";
+import Providers from "./providers";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -23,7 +22,6 @@ const notoSans = Noto_Sans_Devanagari({
   variable: "--font-hindi",
   display: "swap",
 });
-
 
 
 export const metadata = {
@@ -47,7 +45,7 @@ export default function RootLayout({ children }) {
     min-h-screen bg-background text-foreground antialiased
   `}
       >
-        <AuthProvider>
+        <Providers>
           <Suspense
             fallback={
               <div className="h-20 w-full border-b border-border bg-background" />
@@ -56,7 +54,7 @@ export default function RootLayout({ children }) {
             <Navbar />
           </Suspense>
           <main className="w-full">{children}</main>
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -28,7 +28,6 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 
 const PUJA_HISTORY = [
     {
@@ -121,6 +120,7 @@ function AccountRow({
     );
 }
 
+
 function AccountSection({ title, children, action }) {
     return (
         <section className="space-y-4">
@@ -171,8 +171,8 @@ function BookingCard({ booking }) {
             <div className="flex shrink-0 flex-col items-end gap-2">
                 <span
                     className={`rounded-full px-3 py-1 text-xs font-medium ${isCancelled
-                            ? "bg-[#fbe7e6] text-[#a73f3b]"
-                            : "bg-[#ffeadc] text-[#c56b3c]"
+                        ? "bg-[#fbe7e6] text-[#a73f3b]"
+                        : "bg-[#ffeadc] text-[#c56b3c]"
                         }`}
                 >
                     {booking.status}
@@ -185,6 +185,7 @@ function BookingCard({ booking }) {
         </div>
     );
 }
+
 
 function DevoteeAccountContent() {
     const router = useRouter();
@@ -213,59 +214,9 @@ function DevoteeAccountContent() {
     };
 
     return (
-        <main
-            className={`min-h-screen ${darkMode ? "bg-[#211c19]" : "bg-[#fffdf6]"
-                }`}
-        >
+        <div className="w-full space-y-9">
             <div className="mx-auto max-w-5xl px-4 pb-16 sm:px-6 lg:px-8">
-
-                {/* Account Header */}
-                <header className="sticky top-0 z-30 -mx-4 flex h-[76px] items-center justify-between border-b border-[#eee7da] bg-[#fffdf6]/95 px-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                    <div className="flex min-w-0 items-center gap-3">
-                        <button
-                            type="button"
-                            onClick={() => router.back()}
-                            aria-label="Go back"
-                            className="flex size-10 shrink-0 items-center justify-center rounded-full text-[#422d24] transition hover:bg-[#f6eee3]"
-                        >
-                            <ArrowLeft size={25} />
-                        </button>
-
-                        <h1 className="truncate font-display text-[23px] font-medium text-[#39251d] sm:text-[27px]">
-                            Devotee Account
-                        </h1>
-                    </div>
-
-                    <div className="flex shrink-0 items-center gap-2 sm:gap-4">
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setLanguage((prev) => prev === "EN" ? "हि" : "EN")
-                            }
-                            className="flex h-10 items-center gap-1 rounded-full border border-[#ead9c8] bg-[#fff2e6] px-3 text-sm font-medium text-[#713c32]"
-                            aria-label="Toggle language label"
-                        >
-                            <Languages size={17} />
-                            {language}
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={toggleTheme}
-                            aria-label="Toggle dark mode"
-                            className="flex size-10 items-center justify-center rounded-full text-[#624b40] hover:bg-[#f6eee3]"
-                        >
-                            {darkMode ? <Sun size={22} /> : <Moon size={22} />}
-                        </button>
-
-                        <div className="flex size-10 items-center justify-center rounded-full bg-[#fbe9dc] font-display text-lg text-[#bd6439]">
-                            {initials}
-                        </div>
-                    </div>
-                </header>
-
-                <div className="space-y-9 pt-7 sm:pt-10">
-
+                <div className="space-y-9 ">
                     {/* Profile Card */}
                     <section className="rounded-[28px] border border-[#e6ddce] bg-white p-5 shadow-[0_3px_12px_rgba(70,45,25,0.08)] sm:p-8">
                         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
@@ -427,14 +378,19 @@ function DevoteeAccountContent() {
                     </p>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }
 
+
 export default function AccountPage() {
-    return (
-        <ProtectedRoute allowedRoles={["DEVOTEE"]}>
-            <DevoteeAccountContent />
-        </ProtectedRoute>
-    );
+    return <DevoteeAccountContent />;
 }
+
+// export default function AccountPage() {
+//     return (
+//         <ProtectedRoute allowedRoles={["DEVOTEE"]}>
+//             <DevoteeAccountContent />
+//         </ProtectedRoute>
+//     );
+// }

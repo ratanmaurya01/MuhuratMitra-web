@@ -22,8 +22,6 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 
 
-
-
 const registerSchema = z
   .object({
     accountType: z.enum(["DEVOTEE", "PANDIT"]),
@@ -91,7 +89,6 @@ function FormField({
   );
 }
 
-
 export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -99,8 +96,7 @@ export default function RegisterPage() {
   const [submitError, setSubmitError] = useState("");
 
   const { register: createAccount } = useAuth();
-
-
+  
   const {
     register,
     handleSubmit,
@@ -118,35 +114,30 @@ export default function RegisterPage() {
     },
   });
 
+
   const onSubmit = async (values) => {
     setSubmitError("");
     try {
+      const payload = {
+        accountType: values.accountType,
+        name: values.name.trim(),
+        email: values.email.trim().toLowerCase(),
+        phone: values.phone,
+        password: values.password,
+      };
+
+
       const result = await createAccount(values);
+
+      console.log("Registered User:", result.user);
+
       router.replace(result.redirectTo);
-      // const newUser = {
-      //   id: `USER_${Date.now()}`,
-      //   name: values.name.trim(),
-      //   email: values.email.trim().toLowerCase(),
-      //   phone: values.phone,
-      //   role: values.accountType,
-      //   status:
-      //     values.accountType === "PANDIT"
-      //       ? "PENDING"
-      //       : "ACTIVE",
-      //   createdAt: new Date().toISOString(),
-      // };
-      // // Demo only: replace with backend registration API.
-      // localStorage.setItem(
-      //   "muhuratmitra_user",
-      //   JSON.stringify(newUser)
-      // );
-      // if (newUser.role === "PANDIT") {
-      //   router.replace("/pandit/pending-approval");
-      // } else {
-      //   router.replace("/");
-      // }
-    } catch {
-      setSubmitError("Something went wrong. Please try again.");
+
+
+    } catch (error) {
+      setSubmitError(error.message);
+
+      //setSubmitError("Something went wrong. Please try again.");
     }
   };
 
@@ -224,9 +215,9 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <p className="relative z-10 text-sm text-primary-foreground/60">
+          {/* <p className="relative z-10 text-sm text-primary-foreground/60">
             © {new Date().getFullYear()} MuhuratMitra. All rights reserved.
-          </p>
+          </p> */}
         </section>
 
         {/* Registration Form */}

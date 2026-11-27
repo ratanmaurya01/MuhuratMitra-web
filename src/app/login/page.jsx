@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
+
 const loginSchema = z.object({
   email: z
     .string()
@@ -57,18 +58,15 @@ export default function LoginPage() {
       router.replace(getRedirectPath(user));
     }
   }, [loading, isAuthenticated, user, getRedirectPath, router]);
-
-
+  
   const onSubmit = async (values) => {
     setIsSubmitting(true);
     setLoginError("");
-
     try {
       const result = await login({
         email: values.email,
         password: values.password,
       });
-
       router.replace(result.redirectTo);
     } catch (error) {
       setLoginError(

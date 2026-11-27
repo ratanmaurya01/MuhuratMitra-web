@@ -434,9 +434,9 @@ const FAMILY_DATA = [
   },
 ];
 
+
 export function FamilyPage() {
   const [family, setFamily] = useState(FAMILY_DATA);
-
   const toggleReminder = (memberId, reminderIndex) => {
     setFamily((old) => old.map((member) => member.id !== memberId ? member : {
       ...member,
@@ -502,7 +502,7 @@ export function FamilyPage() {
           </Card>
         ))}
       </div>
-
+      
       <Card className="mt-6 border-[#f1d9c5] bg-[#fff0e3]">
         <div className="flex items-center gap-2 text-[#bd6439]">
           <Sparkles size={24} />

@@ -1,30 +1,15 @@
 
 "use client";
-
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+
 import { useState } from "react";
 import {
-    ArrowLeft,
-    UserRound,
     MapPin,
     CalendarDays,
-    CreditCard,
-    Bookmark,
-    Bell,
-    ChevronRight,
-    Users,
-    Settings,
-    CircleHelp,
-    Info,
-    LogOut,
     Pencil,
     History,
     Flower2,
-    Moon,
-    Sun,
-    Languages,
-    Clock3,
+   
 } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -78,48 +63,6 @@ function getInitials(name = "") {
         .join("") || "U";
 }
 
-function AccountRow({
-    icon: Icon,
-    title,
-    description,
-    badge,
-    href,
-}) {
-    return (
-        <Link
-            href={href}
-            className="group flex min-h-[82px] items-center gap-4 border-b border-[#eee8dc] px-4 py-4 last:border-b-0 sm:px-6"
-        >
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#fbe9df] text-[#c85d2d] transition group-hover:bg-[#f8dfd2]">
-                <Icon size={23} strokeWidth={2.2} />
-            </span>
-
-            <span className="min-w-0 flex-1">
-                <span className="block text-[15px] font-medium text-[#38251e] sm:text-base">
-                    {title}
-                </span>
-
-                {description && (
-                    <span className="mt-1 block text-sm leading-5 text-[#88766d]">
-                        {description}
-                    </span>
-                )}
-            </span>
-
-            {badge && (
-                <span className="shrink-0 rounded-full bg-[#ffeadc] px-3 py-1 text-xs font-medium text-[#c56b3c]">
-                    {badge}
-                </span>
-            )}
-
-            <ChevronRight
-                size={22}
-                className="shrink-0 text-[#78645a] transition group-hover:translate-x-1"
-            />
-        </Link>
-    );
-}
-
 
 function AccountSection({ title, children, action }) {
     return (
@@ -141,7 +84,6 @@ function AccountSection({ title, children, action }) {
 
 function BookingCard({ booking }) {
     const isCancelled = booking.status === "Cancelled";
-
     return (
         <div className="flex items-center gap-3 border-b border-[#eee8dc] px-4 py-5 last:border-b-0 sm:gap-5 sm:px-6">
             <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#f7e5e3] text-[#873d35]">
@@ -188,30 +130,15 @@ function BookingCard({ booking }) {
 
 
 function DevoteeAccountContent() {
-    const router = useRouter();
-    const { user, logout } = useAuth();
+    
+    const { user,  } = useAuth();
 
-    const [darkMode, setDarkMode] = useState(false);
-    const [language, setLanguage] = useState("EN");
     const [showAllHistory, setShowAllHistory] = useState(false);
-
     const name = user?.name || "Devotee";
     const initials = getInitials(name);
-
     const bookings = showAllHistory
         ? PUJA_HISTORY
         : PUJA_HISTORY.slice(0, 4);
-
-    const handleLogout = () => {
-        logout();
-        router.replace("/");
-    };
-
-    const toggleTheme = () => {
-        const nextMode = !darkMode;
-        setDarkMode(nextMode);
-        document.documentElement.classList.toggle("dark", nextMode);
-    };
 
     return (
         <div className="w-full space-y-9">
@@ -235,7 +162,6 @@ function DevoteeAccountContent() {
                                             Devotee
                                         </span>
                                     </div>
-
                                     <p className="mt-2 truncate text-sm text-[#84766e]">
                                         {user?.phone || "Mobile number not added"}
                                         {user?.email ? ` · ${user.email}` : ""}
@@ -258,46 +184,15 @@ function DevoteeAccountContent() {
                         </Link>
                     </section>
 
-                    {/* Bookings & Muhurats */}
-                    <AccountSection title="Bookings & Muhurats">
-                        <AccountRow
-                            icon={CalendarDays}
-                            title="My Bookings"
-                            href="/account/bookings"
-                        />
-
-                        <AccountRow
-                            icon={CreditCard}
-                            title="Payment History"
-                            href="/account/payments"
-                        />
-
-                        <AccountRow
-                            icon={Bookmark}
-                            title="Saved Muhurats"
-                            badge="2 saved"
-                            href="/account/saved-muhurats"
-                        />
-
-                        <AccountRow
-                            icon={Bell}
-                            title="Notifications Inbox"
-                            badge="2 unread"
-                            href="/account/notifications"
-                        />
-                    </AccountSection>
-
-                    {/* Puja History */}
                     <AccountSection
-                        title="My Puja History"
+                        title="Recent Puja History"
                         action={
-                            <button
-                                type="button"
-                                onClick={() => setShowAllHistory((prev) => !prev)}
+                            <Link
+                                href="/account/puja-history"
                                 className="shrink-0 text-sm font-medium text-[#bd6339] hover:underline sm:text-base"
                             >
-                                {showAllHistory ? "Show Less" : "View All"}
-                            </button>
+                                View All
+                            </Link>
                         }
                     >
                         <div className="flex items-center gap-3 border-b border-[#eee8dc] px-5 py-4 sm:px-6">
@@ -315,64 +210,6 @@ function DevoteeAccountContent() {
                         ))}
                     </AccountSection>
 
-                    {/* Personal & Family */}
-                    <AccountSection title="Personal & Family">
-                        <AccountRow
-                            icon={MapPin}
-                            title="Saved Addresses"
-                            href="/account/addresses"
-                        />
-
-                        <AccountRow
-                            icon={Users}
-                            title="My Family"
-                            href="/account/family"
-                        />
-                    </AccountSection>
-
-                    {/* Preferences & Support */}
-                    <AccountSection title="Preferences & Support">
-                        <AccountRow
-                            icon={Bell}
-                            title="Panchang Alerts & Rituals"
-                            description="City-based optimal ritual & puja reminders"
-                            href="/account/alerts"
-                        />
-
-                        <AccountRow
-                            icon={Settings}
-                            title="Settings"
-                            href="/account/settings"
-                        />
-
-                        <AccountRow
-                            icon={CircleHelp}
-                            title="Help & Support"
-                            href="/account/help"
-                        />
-
-                        <AccountRow
-                            icon={Info}
-                            title="About"
-                            href="/about"
-                        />
-                    </AccountSection>
-
-                    {/* Logout */}
-                    <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="flex min-h-[82px] w-full items-center gap-4 rounded-[25px] border border-[#e8c5bd] bg-[#fff1eb] px-6 text-[#a73f3b] transition hover:bg-[#fce6df]"
-                    >
-                        <span className="flex size-12 items-center justify-center rounded-full bg-[#f7dfda]">
-                            <LogOut size={24} />
-                        </span>
-
-                        <span className="text-base font-medium">
-                            Logout
-                        </span>
-                    </button>
-
                     <p className="pb-5 text-center text-xs text-[#a39488]">
                         MuhuratMitra · Your Spiritual Companion
                     </p>
@@ -382,15 +219,6 @@ function DevoteeAccountContent() {
     );
 }
 
-
 export default function AccountPage() {
     return <DevoteeAccountContent />;
 }
-
-// export default function AccountPage() {
-//     return (
-//         <ProtectedRoute allowedRoles={["DEVOTEE"]}>
-//             <DevoteeAccountContent />
-//         </ProtectedRoute>
-//     );
-// }

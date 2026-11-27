@@ -23,7 +23,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 
-import { createBooking, getPujas } from "@/lib/api";
+import { getPujas } from "@/lib/api";
 import { formatDate, getLocalDateString } from "@/utils/dateUtils";
 
 const BOOKING_SLOTS = [
@@ -44,21 +44,20 @@ const BOOKING_STEPS = [
 
 const addressSchema = z.object({
     addressLine: z.string().trim()
-        .min(10, "कम से कम 10 characters का पूरा पता लिखें।")
-        .max(200, "पता 200 characters से कम होना चाहिए।"),
+        .min(10, "Address 10 characters ")
+        .max(200, "Address 200 characters"),
     city: z.string().trim()
-        .min(2, "शहर का नाम लिखें।")
-        .max(60, "शहर का नाम बहुत लंबा है।"),
+        .min(2, "Select City")
+        .max(60, "exceed city name"),
     state: z.string().trim()
-        .min(2, "राज्य का नाम लिखें।")
-        .max(60, "राज्य का नाम बहुत लंबा है।"),
+        .min(2, "Select state")
+        .max(60, "exceed state name"),
     pincode: z.string()
-        .regex(/^[1-9][0-9]{5}$/, "सही 6 digit PIN code लिखें।"),
+        .regex(/^[1-9][0-9]{5}$/, "6 digit number"),
     landmark: z.string()
-        .max(100, "Landmark 100 characters से कम होना चाहिए।")
+        .max(100, "Landmark 100 characters ")
         .optional(),
 });
-
 
 const DEFAULT_ADDRESS = {
     addressLine: "",
@@ -86,13 +85,14 @@ function PanditAvatar({ name = "" }) {
 
 function StepProgress({ step }) {
     return (
+
+
         <div className="mb-6">
             <div className="mb-3 flex items-start justify-between gap-1">
                 {BOOKING_STEPS.map((label, index) => {
                     const number = index + 1;
                     const complete = number < step;
                     const active = number === step;
-
                     return (
                         <div
                             key={label}
@@ -100,8 +100,8 @@ function StepProgress({ step }) {
                         >
                             <div
                                 className={`flex size-8 items-center justify-center rounded-full text-xs font-semibold ${complete || active
-                                        ? "bg-[#d95718] text-white"
-                                        : "bg-[#f1e5d9] text-[#8b776b]"
+                                    ? "bg-[#d95718] text-white"
+                                    : "bg-[#f1e5d9] text-[#8b776b]"
                                     }`}
                             >
                                 {complete ? <Check size={15} /> : number}
@@ -144,7 +144,7 @@ export default function PanditBookingDialog({
     pandit,
     availableDate = "",
 }) {
-    const [pujas, setPujas] = useState([]);
+
     const [pujasLoading, setPujasLoading] = useState(false);
     const [selectedPujaId, setSelectedPujaId] = useState("");
     const [bookingDate, setBookingDate] = useState("");
@@ -167,39 +167,30 @@ export default function PanditBookingDialog({
         mode: "onTouched",
     });
 
+    const services = useMemo(() => {
+        if (!Array.isArray(pandit?.services)) return [];
+
+        return pandit.services.map((service) => ({
+            id: service.id,
+            name: service.service_name,
+            nameHindi: service.service_name,
+            price: Number(service.price || 0),
+            durationMin: Number(service.duration_minutes || 0),
+            description: service.description || "",
+            category: service.category || "",
+            serviceType: service.service_type || "",
+            location: service.location || "",
+        }));
+    }, [pandit?.services]);
+
+    // Selected service
     const selectedPuja = useMemo(
-        () => pujas.find((puja) => String(puja.id) === String(selectedPujaId)) || null,
-        [pujas, selectedPujaId]
+        () =>
+            services.find(
+                (service) => String(service.id) === String(selectedPujaId)
+            ) || null,
+        [services, selectedPujaId]
     );
-
-    useEffect(() => {
-        if (!open) return;
-
-        let active = true;
-
-        async function loadPujas() {
-            setPujasLoading(true);
-
-            try {
-                const result = await getPujas();
-
-                if (active) {
-                    setPujas(Array.isArray(result) ? result : []);
-                }
-            } catch (error) {
-                console.error("Unable to load pujas:", error);
-                if (active) setBookingError("पूजा की जानकारी लोड नहीं हो पाई।");
-            } finally {
-                if (active) setPujasLoading(false);
-            }
-        }
-
-        loadPujas();
-
-        return () => {
-            active = false;
-        };
-    }, [open]);
 
     useEffect(() => {
         if (!open) return;
@@ -213,11 +204,10 @@ export default function PanditBookingDialog({
         reset(DEFAULT_ADDRESS);
     }, [open, pandit?.id, availableDate, reset]);
 
+
     function handleClose(value) {
         if (bookingLoading) return;
-
         onOpenChange(value);
-
         if (!value) {
             setBookingError("");
         }
@@ -247,7 +237,6 @@ export default function PanditBookingDialog({
                 return;
             }
         }
-
         if (step === 3) {
             const valid = await trigger([
                 "addressLine",
@@ -256,10 +245,8 @@ export default function PanditBookingDialog({
                 "pincode",
                 "landmark",
             ]);
-
             if (!valid) return;
         }
-
         setStep((current) => Math.min(current + 1, 4));
     }
 
@@ -270,10 +257,8 @@ export default function PanditBookingDialog({
 
     async function handlePayment() {
         if (!pandit || !selectedPuja) return;
-
         setBookingLoading(true);
         setBookingError("");
-
         try {
             const booking = await createBooking({
                 panditId: pandit.id,
@@ -286,7 +271,6 @@ export default function PanditBookingDialog({
                 amount: selectedPuja.price,
                 paymentMode: "MOCK",
             });
-
             setBookingResult(booking);
         } catch (error) {
             console.error("Booking failed:", error);
@@ -377,48 +361,57 @@ export default function PanditBookingDialog({
                                 </div>
 
                                 <div className="space-y-2">
-                                    {pujasLoading ? (
-                                        <p className="py-6 text-center text-sm text-[#857469]">
-                                            पूजा की जानकारी लोड हो रही है...
-                                        </p>
-                                    ) : pujas.length > 0 ? (
-                                        pujas.map((puja) => {
-                                            const active = String(selectedPujaId) === String(puja.id);
 
-                                            return (
-                                                <button
-                                                    key={puja.id}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setSelectedPujaId(puja.id);
-                                                        setBookingError("");
-                                                    }}
-                                                    aria-pressed={active}
-                                                    className={`flex w-full items-center justify-between gap-3 rounded-xl border p-4 text-left transition ${active
+                                    <div className="space-y-2">
+                                        {services.length > 0 ? (
+                                            services.map((service) => {
+                                                const active =
+                                                    String(selectedPujaId) === String(service.id);
+
+                                                return (
+                                                    <button
+                                                        key={service.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedPujaId(String(service.id));
+                                                            setBookingError("");
+                                                        }}
+                                                        aria-pressed={active}
+                                                        className={`flex w-full items-center justify-between gap-3 rounded-xl border p-4 text-left transition ${active
                                                             ? "border-[#d95718] bg-[#f9e8df]"
                                                             : "border-[#ead8c5] bg-white hover:border-[#d95718]"
-                                                        }`}
-                                                >
-                                                    <div className="min-w-0">
-                                                        <p className="font-semibold text-[#38251f]">
-                                                            {puja.nameHindi || puja.name}
-                                                        </p>
-                                                        <p className="mt-1 text-xs text-[#857469]">
-                                                            {puja.durationMin || 0} minutes
-                                                        </p>
-                                                    </div>
+                                                            }`}
+                                                    >
+                                                        <div className="min-w-0">
+                                                            <p className="font-semibold text-[#38251f]">
+                                                                {service.name}
+                                                            </p>
 
-                                                    <span className="shrink-0 text-sm font-bold text-[#d95718]">
-                                                        ₹{Number(puja.price || 0).toLocaleString("en-IN")}
-                                                    </span>
-                                                </button>
-                                            );
-                                        })
-                                    ) : (
-                                        <p className="py-6 text-center text-sm text-[#857469]">
-                                            पूजा की जानकारी उपलब्ध नहीं है।
-                                        </p>
-                                    )}
+                                                            <p className="mt-1 text-xs text-[#857469]">
+                                                                {service.category} · {service.durationMin} minutes
+                                                            </p>
+
+                                                            {service.description && (
+                                                                <p className="mt-1 text-xs text-[#857469]">
+                                                                    {service.description}
+                                                                </p>
+                                                            )}
+                                                        </div>
+
+                                                        <span className="shrink-0 text-sm font-bold text-[#d95718]">
+                                                            ₹{service.price.toLocaleString("en-IN")}
+                                                        </span>
+                                                    </button>
+                                                );
+                                            })
+                                        ) : (
+                                            <p className="py-6 text-center text-sm text-[#857469]">
+                                                इस Pandit की services अभी उपलब्ध नहीं हैं।
+                                            </p>
+                                        )}
+                                    </div>
+
+
                                 </div>
                             </div>
                         )}
@@ -468,8 +461,8 @@ export default function PanditBookingDialog({
                                                     }}
                                                     aria-pressed={active}
                                                     className={`rounded-lg border px-3 py-3 text-xs font-medium transition sm:text-sm ${active
-                                                            ? "border-[#d95718] bg-[#f9e8df] text-[#d95718]"
-                                                            : "border-[#ead8c5] bg-white text-[#857469] hover:border-[#d95718]"
+                                                        ? "border-[#d95718] bg-[#f9e8df] text-[#d95718]"
+                                                        : "border-[#ead8c5] bg-white text-[#857469] hover:border-[#d95718]"
                                                         }`}
                                                 >
                                                     {slot}
@@ -667,7 +660,8 @@ export default function PanditBookingDialog({
                                 <button
                                     type="submit"
                                     form="booking-address-form"
-                                    className="inline-flex items-center gap-2 rounded-lg bg-[#d95718] px-5 py-3 text-sm font-semibold text-white hover:bg-[#b94715]"
+                                    className="inline-flex items-center gap-2 rounded-lg
+                                     bg-[#d95718] px-5 py-3 text-sm font-semibold text-white hover:bg-[#b94715]"
                                 >
                                     Review Booking
                                     <ChevronRight size={17} />
@@ -677,7 +671,9 @@ export default function PanditBookingDialog({
                                     type="button"
                                     onClick={handlePayment}
                                     disabled={bookingLoading}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-[#d95718] px-5 py-3 text-sm font-semibold text-white hover:bg-[#b94715] disabled:opacity-60"
+                                    className="inline-flex items-center gap-2 
+                                    rounded-lg bg-[#d95718] px-5 py-3 text-sm font-semibold
+                                     text-white hover:bg-[#b94715] disabled:opacity-60"
                                 >
                                     <IndianRupee size={17} />
                                     {bookingLoading ? "Processing..." : "Pay (Demo)"}

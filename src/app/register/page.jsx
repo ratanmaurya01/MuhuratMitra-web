@@ -126,14 +126,9 @@ export default function RegisterPage() {
         password: values.password,
       };
 
-
       const result = await createAccount(values);
-
       console.log("Registered User:", result.user);
-
       router.replace(result.redirectTo);
-
-
     } catch (error) {
       setSubmitError(error.message);
 

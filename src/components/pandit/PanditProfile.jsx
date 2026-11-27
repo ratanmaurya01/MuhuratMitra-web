@@ -1,6 +1,5 @@
 import { Star, MessageCircle } from "lucide-react";
 
-
 export function RatingStars({ rating = 0 }) {
     return (
         <div className="flex items-center gap-1 text-[#d99a0b]">
@@ -77,51 +76,40 @@ export function RatingBreakdown({ reviews, rating }) {
     );
 }
 
-export function ReviewCard({ review }) {
+function ReviewCard({ review }) {
     return (
-        <article className="rounded-[26px] border border-[#e6ddca] bg-white p-5 sm:p-6">
-            <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="rounded-[22px] border border-[#e9dfd2] bg-white p-5 shadow-sm">
+            <div className="flex items-start justify-between gap-3">
                 <div>
-                    <h3 className="text-lg font-medium text-[#38251f]">
-                        {review.userName}
+                    <h3 className="font-semibold text-[#38251f]">
+                        {review?.devotee_name || "Anonymous Devotee"}
                     </h3>
 
-                    <p className="mt-1 text-sm text-[#857469]">
-                        {review.pujaName} {review.date && `• ${review.date}`}
+                    <p className="mt-1 text-xs text-[#857469]">
+                        {review?.created_at
+                            ? new Date(
+                                review.created_at.replace(" ", "T")
+                            ).toLocaleDateString("en-IN", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                            })
+                            : ""}
                     </p>
                 </div>
-                <RatingStars rating={review.rating} />
+
+                <div className="flex items-center gap-1 rounded-full bg-[#fff5e7] px-3 py-1">
+                    <Star size={15} className="fill-[#e6a23c] text-[#e6a23c]" />
+                    <span className="text-sm font-semibold text-[#38251f]">
+                        {Number(review?.rating || 0).toFixed(1)}
+                    </span>
+                </div>
             </div>
 
-            {review.tags?.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                    {review.tags.map((tag) => (
-                        <span
-                            key={tag}
-                            className="rounded-full bg-[#ffeadc] px-4 py-2 text-xs font-medium text-[#bd6338]"
-                        >
-                            {tag}
-                        </span>
-                    ))}
-                </div>
-            )}
-            <p className="mt-4 text-[15px] leading-7 text-[#4f4038]">
-                {review.comment}
+            <p className="mt-4 text-sm leading-7 text-[#66564d]">
+                {review?.review || "No written review."}
             </p>
-
-            {review.images?.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-3">
-                    {review.images.map((image, index) => (
-                        <img
-                            key={index}
-                            src={image}
-                            alt="Puja experience"
-                            className="size-36 rounded-2xl object-cover"
-                        />
-                    ))}
-                </div>
-            )}
-        </article>
+        </div>
     );
 }
 
@@ -130,7 +118,7 @@ export function DevoteeReviews({ reviews = [], totalReviews = 0 }) {
         <section>
             <div className="mb-5 flex items-center justify-between">
                 <h2 className="font-serif text-2xl text-[#38251f]">
-                    Devotee Reviews
+                    Reviews
                 </h2>
 
                 <span className="text-sm text-[#857469]">

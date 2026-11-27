@@ -235,15 +235,7 @@ export function BookingsPage() {
   );
 }
 
-// 2. PAYMENT HISTORY
-const PAYMENT_DATA = [
-  ["Griha Pravesh & Vastu Puja", "22 Nov 2026", "UPI (GPay)", "₹5100", "Paid"],
-  ["Satyanarayan Katha", "20 Nov 2026", "HDFC Card ••4128", "₹2800", "Pending"],
-  ["Naamkaran Sanskar", "18 Nov 2026", "UPI (PhonePe)", "₹3400", "Paid"],
-  ["Ganesh Lakshmi Puja", "08 Nov 2026", "UPI (Paytm)", "₹2200", "Refunded"],
-  ["Maha Rudrabhishek Puja", "02 Nov 2026", "UPI (GPay)", "₹2500", "Paid"],
-  ["Navgraha Shanti Havan", "19 Oct 2026", "ICICI Card ••9014", "₹2700", "Paid"],
-];
+
 
 export function PaymentsPage() {
   return (

@@ -90,10 +90,10 @@ function PujaCard({ puja }) {
         </div>
 
         <h2 className="mt-4 text-xl font-medium leading-snug text-[#35251f] sm:text-2xl">
-          {puja.nameHindi || puja.name}
+          {puja.name || puja.nameHindi}
         </h2>
 
-        {puja.nameHindi && puja.name && (
+        {puja.name && puja.nameHindi && (
           <p className="mt-1 text-sm text-[#806d61]">
             {puja.name}
           </p>

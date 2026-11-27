@@ -1,7 +1,39 @@
 import { getMonthPanchangMock, todayPanchang, upcomingFestivals } from "@/lib/mock/panchang";
-import { pujas } from "@/lib/mock/pujas";
-import { pandits } from "@/lib/mock/pandits";
 import { mockBookings } from "./mock/bookings";
+
+// "https://rstar.alwaysdata.net/api/v1/user/register"
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8100/api/v1";
+
+export const apiCall = async ({
+  endpoint,
+  method = "GET",
+  data = null,
+  headers = {},
+}) => {
+  try {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+      credentials: "include",
+      ...(data && { body: JSON.stringify(data) }),
+    });
+
+    const result = await response.json();
+    if (!response.ok || result.success === false) {
+      throw new Error(result.message || "Something went wrong");
+    }
+
+    return result;
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
+};
+
 
 const delay = (ms = 300) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -18,94 +50,49 @@ export async function getFestivals() {
   return [...upcomingFestivals];
 }
 
-export async function getPujas(q = "") {
-  await delay();
-
-  const query = q.trim().toLowerCase();
-
-  if (!query) {
-    return [...pujas];
+export const getPujas = async (search = "", category = "") => {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  if (category && category !== "All Pujas") {
+    params.set("category", category);
   }
 
-  return pujas.filter((puja) => {
-    const searchableText = [
-      puja.name,
-      puja.nameHindi,
-      puja.description,
-      puja.id,
-    ]
-      .join(" ")
-      .toLowerCase();
+  const query = params.toString();
 
-    return searchableText.includes(query);
+  const response = await apiCall({
+    endpoint: `/pujas${query ? `?${query}` : ""}`,
+    method: "GET",
   });
-}
 
-export async function getPuja(id) {
-  await delay();
+  return response?.data || [];
+};
 
-  return pujas.find((puja) => puja.id === id) || null;
-}
 
-export async function getPandits(filters = {}) {
-  await delay();
-
-  const {
-    city,
-    language,
-    minRating,
-    verified,
-    availableDate,
-  } = filters;
-
-  return pandits.filter((pandit) => {
-    // Filter by city
-    if (
-      city &&
-      pandit.city.toLowerCase() !== city.trim().toLowerCase()
-    ) {
-      return false;
-    }
-
-    // Filter by language
-    if (
-      language &&
-      !pandit.languages.some(
-        (item) => item.toLowerCase() === language.trim().toLowerCase()
-      )
-    ) {
-      return false;
-    }
-
-    // Filter by minimum rating
-    if (
-      minRating !== undefined &&
-      pandit.rating < Number(minRating)
-    ) {
-      return false;
-    }
-
-    // Filter verified Pandits
-    if (
-      verified !== undefined &&
-      pandit.verified !== verified
-    ) {
-      return false;
-    }
-
-    // Filter by availability date
-    if (
-      availableDate &&
-      !pandit.availableSlots.some(
-        (slot) => slot.date === availableDate
-      )
-    ) {
-      return false;
-    }
-
-    return true;
+export const getPujaById = async (id) => {
+  const response = await apiCall({
+    endpoint: `/pujas/${id}`,
+    method: "GET",
   });
-}
+
+  return response?.data || null;
+};
+
+
+
+
+export const getPandits = (filters = {}) => {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value) {
+      params.append(key, value);
+    }
+  });
+  const query = params.toString();
+  return apiCall({
+    endpoint: `/pandits${query ? `?${query}` : ""}`,
+    method: "GET",
+  });
+};
 
 export async function getMonthPanchang(year, month) {
   await delay();
@@ -270,38 +257,3 @@ export async function rescheduleBooking(id, date, time) {
   return updatedBooking;
 }
 
-
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8100/api/v1";
-
-
-
-  export const apiCall = async ({
-  endpoint,
-  method = "GET",
-  data = null,
-  headers = {},
-}) => {
-  try {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        ...headers,
-      },
-      credentials: "include",
-      ...(data && { body: JSON.stringify(data) }),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok || result.success === false) {
-      throw new Error(result.message || "Something went wrong");
-    }
-
-    return result;
-  } catch (error) {
-    console.error("API Error:", error);
-    throw error;
-  }
-};

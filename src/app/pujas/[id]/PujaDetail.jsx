@@ -16,7 +16,8 @@ import {
   UserSearch,
   UserSearchIcon,
 } from "lucide-react";
-import { getPuja } from "@/lib/api";
+import { getPujaById } from "@/lib/api";
+
 
 function DetailSkeleton() {
   return (
@@ -33,7 +34,6 @@ function DetailSkeleton() {
 }
 
 
-
 export default function PujaDetailPage({ id }) {
   const [puja, setPuja] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,7 @@ export default function PujaDetailPage({ id }) {
       setPuja(null);
       setCheckedItems([]);
       try {
-        const result = await getPuja(id);
+        const result = await getPujaById(id);
         if (isActive) {
           setPuja(result);
         }

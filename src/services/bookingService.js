@@ -14,13 +14,6 @@ export const submitBooking = (data) =>
         data,
     });
 
-
-// export const getMyBookings = () =>
-//     apiCall({
-//         endpoint: "/bookings/my-bookings",
-//         method: "GET",
-//     });
-
 export const getDevoteeBookings = async (bookingType = "") => {
     const query = bookingType
         ? `?booking_type=${encodeURIComponent(bookingType)}`

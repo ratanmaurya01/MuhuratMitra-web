@@ -26,6 +26,7 @@ import {
     rejectPandit,
 } from "@/services/adminService";
 
+
 const TABS = [
     { key: "pending", label: "Pending", icon: Clock3 },
     { key: "active", label: "Approved", icon: UserCheck },
@@ -55,6 +56,8 @@ export default function AdminPanditsPage() {
             setLoading(true);
 
             const response = await getAllPandits("all");
+            console.log("response", response);
+
 
             if (response?.success) {
                 setPandits(Array.isArray(response.data) ? response.data : []);
@@ -284,21 +287,19 @@ export default function AdminPanditsPage() {
                             key={tab.key}
                             type="button"
                             onClick={() => setActiveTab(tab.key)}
-                            className={`inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${
-                                activeTab === tab.key
-                                    ? "border-[#8b472e] bg-[#8b472e] text-white"
-                                    : "border-[#e8ddce] bg-white text-[#705647] hover:bg-[#fffaf3]"
-                            }`}
+                            className={`inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition ${activeTab === tab.key
+                                ? "border-[#8b472e] bg-[#8b472e] text-white"
+                                : "border-[#e8ddce] bg-white text-[#705647] hover:bg-[#fffaf3]"
+                                }`}
                         >
                             <Icon size={17} />
                             {tab.label}
 
                             <span
-                                className={`rounded-full px-2 py-0.5 text-xs ${
-                                    activeTab === tab.key
-                                        ? "bg-white/20 text-white"
-                                        : "bg-[#f5ede4] text-[#705647]"
-                                }`}
+                                className={`rounded-full px-2 py-0.5 text-xs ${activeTab === tab.key
+                                    ? "bg-white/20 text-white"
+                                    : "bg-[#f5ede4] text-[#705647]"
+                                    }`}
                             >
                                 {counts[tab.key]}
                             </span>
@@ -404,10 +405,9 @@ export default function AdminPanditsPage() {
                                     {/* Status and Actions */}
                                     <div className="flex flex-wrap items-center gap-2">
                                         <span
-                                            className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${
-                                                STATUS_STYLES[status] ||
+                                            className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${STATUS_STYLES[status] ||
                                                 "bg-gray-100 text-gray-600"
-                                            }`}
+                                                }`}
                                         >
                                             {status}
                                         </span>
@@ -516,10 +516,9 @@ export default function AdminPanditsPage() {
                                         </h3>
 
                                         <span
-                                            className={`mt-1 inline-block rounded-full px-3 py-1 text-xs font-semibold capitalize ${
-                                                STATUS_STYLES[getStatus(selectedPandit.status)] ||
+                                            className={`mt-1 inline-block rounded-full px-3 py-1 text-xs font-semibold capitalize ${STATUS_STYLES[getStatus(selectedPandit.status)] ||
                                                 "bg-gray-100 text-gray-600"
-                                            }`}
+                                                }`}
                                         >
                                             {selectedPandit.status}
                                         </span>

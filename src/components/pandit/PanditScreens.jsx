@@ -570,7 +570,6 @@ export function CompleteProfileScreen() {
     );
 }
 
-
 // --------------------------------------------------
 // SERVICES
 // --------------------------------------------------
@@ -811,9 +810,7 @@ const getDisplayStatus = (status) => {
 
 const formatDate = (value) => {
     if (!value) return "-";
-
     const [year, month, day] = String(value).slice(0, 10).split("-");
-
     return new Date(
         Number(year),
         Number(month) - 1,
@@ -827,12 +824,9 @@ const formatDate = (value) => {
 
 const formatTime = (value) => {
     if (!value) return "-";
-
     const [hours, minutes] = String(value).split(":");
     const date = new Date();
-
     date.setHours(Number(hours), Number(minutes), 0, 0);
-
     return date.toLocaleTimeString("en-IN", {
         hour: "2-digit",
         minute: "2-digit",
@@ -852,7 +846,6 @@ export function PanditBookingsScreen() {
         try {
             setLoading(true);
             setError("");
-
             const response = await getPanditBookings();
 
             const list = Array.isArray(response?.data)
@@ -959,11 +952,10 @@ export function PanditBookingsScreen() {
                             key={status}
                             type="button"
                             onClick={() => setFilter(status)}
-                            className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${
-                                filter === status
+                            className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${filter === status
                                     ? "border-[#8b472e] bg-[#8b472e] text-white"
                                     : "border-[#e8ddce] bg-white text-[#705647] hover:bg-[#fff8f2]"
-                            }`}
+                                }`}
                         >
                             {status}
                         </button>
@@ -1183,8 +1175,6 @@ export function PanditBookingsScreen() {
         </div>
     );
 }
-
-
 
 // --------------------------------------------------
 // EARNINGS

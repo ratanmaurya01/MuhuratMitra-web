@@ -8,7 +8,6 @@ export const getPujaById = async (id) => {
     return response?.data || null;
 };
 
-
 export const getPuja = async () => {
     const response = await apiCall({
         endpoint: `/pujas`,

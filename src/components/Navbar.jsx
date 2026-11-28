@@ -15,7 +15,7 @@ import {
   LayoutDashboard,
   ChevronDown,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
 const NAV_ITEMS = [
@@ -37,6 +37,12 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Wait until the component mounts on the client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Centralized authentication
   const {
@@ -73,21 +79,16 @@ export default function Navbar() {
     router.replace("/");
   };
 
-  // Close menus on route change
+  // Close menus
   const closeMenus = () => {
     setMenuOpen(false);
     setProfileOpen(false);
   };
 
-  // Hide global navbar on account pages
-  // const hideNavbar =
-  //   pathname === "/account" ||
-  //   pathname.startsWith("/account/") ||
-  //   pathname === "/pandits/account" ||
-  //   pathname.startsWith("/pandit/account/");
-
-  // if (hideNavbar) return null;
-
+  // Close menus when route changes
+  useEffect(() => {
+    closeMenus();
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-md">
@@ -122,10 +123,11 @@ export default function Navbar() {
                 key={href}
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex items-center gap-2 text-sm font-medium transition-colors ${active
+                className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                  active
                     ? "text-primary"
                     : "text-muted-foreground hover:text-primary"
-                  }`}
+                }`}
               >
                 <Icon size={17} aria-hidden="true" />
                 {name}
@@ -137,7 +139,7 @@ export default function Navbar() {
         {/* Desktop Actions */}
         <div className="relative hidden items-center md:flex">
 
-          {loading ? (
+          {!mounted || loading ? (
             <div className="h-10 w-24 animate-pulse rounded-lg bg-muted" />
           ) : !isAuthenticated ? (
             <Link
@@ -152,9 +154,7 @@ export default function Navbar() {
               {/* Profile Button */}
               <button
                 type="button"
-                onClick={() =>
-                  setProfileOpen((prev) => !prev)
-                }
+                onClick={() => setProfileOpen((prev) => !prev)}
                 className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 transition hover:border-primary"
                 aria-expanded={profileOpen}
                 aria-label="Open account menu"
@@ -175,8 +175,9 @@ export default function Navbar() {
 
                 <ChevronDown
                   size={16}
-                  className={`transition-transform ${profileOpen ? "rotate-180" : ""
-                    }`}
+                  className={`transition-transform ${
+                    profileOpen ? "rotate-180" : ""
+                  }`}
                 />
               </button>
 
@@ -196,6 +197,7 @@ export default function Navbar() {
                       <p className="truncate text-sm font-semibold">
                         {user?.name}
                       </p>
+
                       <p className="truncate text-xs text-muted-foreground">
                         {user?.email}
                       </p>
@@ -258,10 +260,11 @@ export default function Navbar() {
                   href={href}
                   onClick={closeMenus}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${active
+                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                    active
                       ? "bg-saffron-light text-primary"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
+                  }`}
                 >
                   <Icon size={19} aria-hidden="true" />
                   {name}
@@ -270,7 +273,7 @@ export default function Navbar() {
             })}
 
             {/* Mobile Authentication */}
-            {loading ? (
+            {!mounted || loading ? (
               <div className="mt-2 h-11 animate-pulse rounded-lg bg-muted" />
             ) : !isAuthenticated ? (
               <Link
@@ -292,6 +295,7 @@ export default function Navbar() {
                     <p className="truncate text-sm font-semibold">
                       {user?.name || "My Account"}
                     </p>
+
                     <p className="truncate text-xs text-muted-foreground">
                       {dashboardLabel}
                     </p>

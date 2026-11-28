@@ -50,35 +50,6 @@ export async function getFestivals() {
   return [...upcomingFestivals];
 }
 
-export const getPujas = async (search = "", category = "") => {
-  const params = new URLSearchParams();
-  if (search) params.set("search", search);
-  if (category && category !== "All Pujas") {
-    params.set("category", category);
-  }
-
-  const query = params.toString();
-
-  const response = await apiCall({
-    endpoint: `/pujas${query ? `?${query}` : ""}`,
-    method: "GET",
-  });
-
-  return response?.data || [];
-};
-
-
-export const getPujaById = async (id) => {
-  const response = await apiCall({
-    endpoint: `/pujas/${id}`,
-    method: "GET",
-  });
-
-  return response?.data || null;
-};
-
-
-
 
 export const getPandits = (filters = {}) => {
   const params = new URLSearchParams();

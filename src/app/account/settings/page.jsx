@@ -1,5 +1,5 @@
+import { SettingsPage } from "../AccountScreens";
 
-import { SettingsPage } from "@/components/account/AccountScreens";
 export default function Page() {
   return <SettingsPage />;
 }

@@ -400,6 +400,7 @@ export function NotificationsPage() {
   );
 }
 
+
 // 5. MY FAMILY
 const FAMILY_DATA = [
   {
@@ -517,78 +518,6 @@ export function FamilyPage() {
   );
 }
 
-// 6. SAVED ADDRESSES
-const ADDRESS_DATA = [
-  { id: 1, label: "Home", type: "home", address: "Flat 402, Shanti Residency, Vaishali Nagar, Jaipur - 302021", isDefault: true },
-  { id: 2, label: "Office", type: "office", address: "Suite 710, Sunrise Tech Park, Malviya Nagar, Jaipur - 302017", isDefault: false },
-];
-
-export function AddressesPage() {
-  const [addresses, setAddresses] = useState(ADDRESS_DATA);
-
-  const setDefault = (id) => {
-    setAddresses((old) => old.map((a) => ({ ...a, isDefault: a.id === id })));
-  };
-
-  const remove = (id) => {
-    setAddresses((old) => old.filter((a) => a.id !== id));
-  };
-
-  return (
-    <Screen title="Saved Addresses" subtitle="Manage your puja and booking addresses.">
-      <div className="space-y-5">
-        {addresses.map((a) => (
-          <Card key={a.id} className={a.isDefault ? "border-[#bd6439]" : ""}>
-            <div className="flex items-center gap-3">
-              <span className="text-[#bd6439]">
-                {a.type === "home" ? <Home size={26} /> : <Briefcase size={26} />}
-              </span>
-              <h3 className="text-xl text-[#39251d]">{a.label}</h3>
-              {a.isDefault && (
-                <span className="rounded-full bg-[#e0f4e8] px-3 py-1 text-xs text-[#39754d]">
-                  Default
-                </span>
-              )}
-              <div className="ml-auto flex items-center gap-3">
-                <button
-                  onClick={() => alert("Connect Edit Address form here.")}
-                  className="p-1 text-[#39251d]"
-                  aria-label="Edit address"
-                >
-                  <Pencil size={23} />
-                </button>
-                <button
-                  onClick={() => remove(a.id)}
-                  className="p-1 text-red-700"
-                  aria-label="Delete address"
-                >
-                  <Trash2 size={23} />
-                </button>
-              </div>
-            </div>
-            <p className="mt-5 text-[15px] leading-7 text-[#82736b]">{a.address}</p>
-            {!a.isDefault && (
-              <button
-                onClick={() => setDefault(a.id)}
-                className="mt-5 rounded-full border border-[#e6ddce] px-5 py-3 text-sm font-medium text-[#bd6439]"
-              >
-                ✓ Set Default
-              </button>
-            )}
-          </Card>
-        ))}
-      </div>
-
-      <button
-        onClick={() => alert("Connect Add Address form here.")}
-        className="fixed bottom-7 right-6 flex size-[68px] items-center justify-center rounded-[24px] bg-[#d6531d] text-white shadow-xl lg:static lg:mt-6 lg:size-auto lg:gap-2 lg:rounded-full lg:px-6 lg:py-4"
-      >
-        <Plus size={30} />
-        <span className="hidden lg:inline">Add Address</span>
-      </button>
-    </Screen>
-  );
-}
 
 // 7. PANCHANG ALERTS
 export function AlertsPage() {

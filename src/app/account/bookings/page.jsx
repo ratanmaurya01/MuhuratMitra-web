@@ -12,7 +12,7 @@ import {
   ReceiptText,
 } from "lucide-react";
 
-import { getMyBookings } from "@/services/bookingService";
+import { getDevoteeBookings } from "@/services/bookingService";
 import ReviewDialog from "@/components/reviews/ReviewDialog";
 
 const STATUS_STYLES = {
@@ -70,32 +70,40 @@ export default function BookingsPage() {
   const [selectedBooking, setSelectedBooking] = useState(null);
 
 
+
   const fetchBookings = async () => {
     try {
-      setLoading(true);
-      setError("");
+        setLoading(true);
+        setError("");
 
-      const response = await getMyBookings();
+        const response = await getDevoteeBookings("service");
 
-      const list = Array.isArray(response?.data)
-        ? response.data
-        : [];
+        console.log("Bookings Response:", response);
 
-      setBookings(list);
+        const list = Array.isArray(response)
+            ? response
+            : Array.isArray(response?.data)
+                ? response.data
+                : [];
+
+        setBookings(list);
+
     } catch (err) {
-      console.error("Fetch bookings error:", err);
+        console.error("Fetch bookings error:", err);
 
-      setError(
-        err?.message || "Unable to load your bookings."
-      );
+        setError(
+            err?.message || "Unable to load your bookings."
+        );
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
-  useEffect(() => {
+useEffect(() => {
     fetchBookings();
-  }, []);
+}, []);
+
+  
 
   const totalBookings = bookings.length;
 
@@ -365,9 +373,6 @@ export default function BookingsPage() {
           }}
         />
       )}
-
-
-
     </>
   );
 }

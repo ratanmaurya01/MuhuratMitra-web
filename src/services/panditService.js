@@ -48,7 +48,6 @@ export const updatePanditServiceStatus = (id, status) =>
         data: { status },
     });
 
-
 export const getPanditById = (panditId) =>
     apiCall({
         endpoint: `/public/pandits/${panditId}`,

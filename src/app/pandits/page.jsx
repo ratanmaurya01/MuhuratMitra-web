@@ -73,7 +73,52 @@ export default function PanditsPage() {
     const [bookingError, setBookingError] = useState("");
     const [bookingSuccess, setBookingSuccess] = useState(null);
 
+
+    const [pujaId, setPujaId] = useState("");
+    const [queryReady, setQueryReady] = useState(false);
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("puja") || params.get("puja_id") || "";
+        setPujaId(id);
+        setQueryReady(true);
+    }, []);
+
+
+
+    // const fetchPandits = useCallback(async () => {
+    //     try {
+    //         setLoading(true);
+    //         setLoadError("");
+
+    //         const filters = {
+    //             ...(city !== "all" ? { city } : {}),
+    //             ...(language ? { language } : {}),
+    //         };
+
+    //         const response = await getPandits(filters);
+
+    //         // Supports both array response and { data: [] } response
+    //         const list = Array.isArray(response)
+    //             ? response
+    //             : Array.isArray(response?.data)
+    //                 ? response.data
+    //                 : [];
+
+    //         setPandits(list);
+    //     } catch (error) {
+    //         console.error("Fetch Pandits Error:", error);
+    //         setLoadError(
+    //             error?.message || "Unable to load pandits. Please try again."
+    //         );
+    //         setPandits([]);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }, [city, language]);
+
     const fetchPandits = useCallback(async () => {
+        if (!queryReady) return;
+
         try {
             setLoading(true);
             setLoadError("");
@@ -81,11 +126,11 @@ export default function PanditsPage() {
             const filters = {
                 ...(city !== "all" ? { city } : {}),
                 ...(language ? { language } : {}),
+                ...(pujaId ? { puja: pujaId } : {}),
             };
 
             const response = await getPandits(filters);
 
-            // Supports both array response and { data: [] } response
             const list = Array.isArray(response)
                 ? response
                 : Array.isArray(response?.data)
@@ -102,24 +147,30 @@ export default function PanditsPage() {
         } finally {
             setLoading(false);
         }
-    }, [city, language]);
+    }, [city, language, pujaId, queryReady]);
+
 
     useEffect(() => {
         fetchPandits();
     }, [fetchPandits]);
 
+
     const openPanditServices = async (pandit) => {
         if (authLoading) return;
 
         if (!user) {
+            const redirectUrl = pujaId
+                ? `/pandits?puja=${encodeURIComponent(pujaId)}`
+                : "/pandits";
+
             router.push(
-                `/login?redirect=${encodeURIComponent("/pandits")}`
+                `/login?redirect=${encodeURIComponent(redirectUrl)}`
             );
             return;
         }
 
         if (user.role?.toUpperCase() !== "DEVOTEE") {
-            alert("Please login with a Devotee account to book a service.");
+            alert("Please login with a Devotee account to book.");
             return;
         }
 
@@ -128,6 +179,7 @@ export default function PanditsPage() {
         setServices([]);
         setBookingError("");
         setBookingSuccess(null);
+
         setBookingForm({
             ...INITIAL_BOOKING,
             devotee_name: user.name || "",
@@ -135,6 +187,12 @@ export default function PanditsPage() {
             city: pandit.city || "",
         });
 
+        // PUJA FLOW: No service fetching or selection
+        if (pujaId) {
+            return;
+        }
+
+        // DIRECT BOOKING FLOW: Fetch services
         try {
             setServicesLoading(true);
 
@@ -154,6 +212,55 @@ export default function PanditsPage() {
             setServicesLoading(false);
         }
     };
+
+
+
+    // const openPanditServices = async (pandit) => {
+    //     if (authLoading) return;
+
+    //     if (!user) {
+    //         router.push(
+    //             `/login?redirect=${encodeURIComponent("/pandits")}`
+    //         );
+    //         return;
+    //     }
+
+    //     if (user.role?.toUpperCase() !== "DEVOTEE") {
+    //         alert("Please login with a Devotee account to book a service.");
+    //         return;
+    //     }
+
+    //     setSelectedPandit(pandit);
+    //     setSelectedService(null);
+    //     setServices([]);
+    //     setBookingError("");
+    //     setBookingSuccess(null);
+    //     setBookingForm({
+    //         ...INITIAL_BOOKING,
+    //         devotee_name: user.name || "",
+    //         devotee_mobile: user.mobile || user.phone || "",
+    //         city: pandit.city || "",
+    //     });
+
+    //     try {
+    //         setServicesLoading(true);
+
+    //         const response = await getPublicPanditServices(pandit.id);
+
+    //         const list = Array.isArray(response?.data)
+    //             ? response.data
+    //             : [];
+
+    //         setServices(list);
+    //     } catch (error) {
+    //         console.error("Fetch Pandit Services Error:", error);
+    //         setBookingError(
+    //             error?.message || "Unable to load this pandit's services."
+    //         );
+    //     } finally {
+    //         setServicesLoading(false);
+    //     }
+    // };
 
     const closeBooking = () => {
         if (bookingLoading) return;
@@ -175,17 +282,29 @@ export default function PanditsPage() {
         }));
     };
 
+
     const handleBookingSubmit = async (event) => {
         event.preventDefault();
 
         if (!user || user.role?.toUpperCase() !== "DEVOTEE") {
+            const redirectUrl = pujaId
+                ? `/pandits?puja=${encodeURIComponent(pujaId)}`
+                : "/pandits";
+
             router.push(
-                `/login?redirect=${encodeURIComponent("/pandits")}`
+                `/login?redirect=${encodeURIComponent(redirectUrl)}`
             );
             return;
         }
 
-        if (!selectedPandit || !selectedService) {
+        if (!selectedPandit) {
+            setBookingError("Please select a Pandit.");
+            return;
+        }
+
+        // Direct booking requires a service.
+        // Puja booking does not.
+        if (!pujaId && !selectedService) {
             setBookingError("Please select a service first.");
             return;
         }
@@ -206,8 +325,7 @@ export default function PanditsPage() {
             setBookingLoading(true);
             setBookingError("");
 
-            const payload = {
-                service_id: selectedService.id,
+            const commonPayload = {
                 booking_date: bookingForm.booking_date,
                 booking_time: bookingForm.booking_time,
                 devotee_name: bookingForm.devotee_name.trim(),
@@ -217,6 +335,19 @@ export default function PanditsPage() {
                 special_instructions:
                     bookingForm.special_instructions.trim(),
             };
+
+            const payload = pujaId
+                ? {
+                    ...commonPayload,
+                    booking_type: "puja",
+                    pandit_id: selectedPandit.id,
+                    puja_id: Number(pujaId),
+                }
+                : {
+                    ...commonPayload,
+                    booking_type: "service",
+                    service_id: selectedService.id,
+                };
 
             const response = await submitBooking(payload);
 
@@ -237,6 +368,70 @@ export default function PanditsPage() {
             setBookingLoading(false);
         }
     };
+
+
+    // const handleBookingSubmit = async (event) => {
+    //     event.preventDefault();
+
+    //     if (!user || user.role?.toUpperCase() !== "DEVOTEE") {
+    //         router.push(
+    //             `/login?redirect=${encodeURIComponent("/pandits")}`
+    //         );
+    //         return;
+    //     }
+
+    //     if (!selectedPandit || !selectedService) {
+    //         setBookingError("Please select a service first.");
+    //         return;
+    //     }
+
+    //     if (
+    //         !bookingForm.booking_date ||
+    //         !bookingForm.booking_time ||
+    //         !bookingForm.devotee_name.trim() ||
+    //         !bookingForm.devotee_mobile.trim() ||
+    //         !bookingForm.address.trim() ||
+    //         !bookingForm.city.trim()
+    //     ) {
+    //         setBookingError("Please fill all required booking details.");
+    //         return;
+    //     }
+
+    //     try {
+    //         setBookingLoading(true);
+    //         setBookingError("");
+
+    //         const payload = {
+    //             service_id: selectedService.id,
+    //             booking_date: bookingForm.booking_date,
+    //             booking_time: bookingForm.booking_time,
+    //             devotee_name: bookingForm.devotee_name.trim(),
+    //             devotee_mobile: bookingForm.devotee_mobile.trim(),
+    //             address: bookingForm.address.trim(),
+    //             city: bookingForm.city.trim(),
+    //             special_instructions:
+    //                 bookingForm.special_instructions.trim(),
+    //         };
+
+    //         const response = await submitBooking(payload);
+
+    //         if (!response?.success) {
+    //             setBookingError(
+    //                 response?.message || "Unable to create booking."
+    //             );
+    //             return;
+    //         }
+
+    //         setBookingSuccess(response.data);
+    //     } catch (error) {
+    //         console.error("Create Booking Error:", error);
+    //         setBookingError(
+    //             error?.message || "Booking failed. Please try again."
+    //         );
+    //     } finally {
+    //         setBookingLoading(false);
+    //     }
+    // };
 
     const filteredPandits = pandits.filter((pandit) => {
         const name = (pandit.name || pandit.fullName || "").toLowerCase();
@@ -329,7 +524,7 @@ export default function PanditsPage() {
                 <div className="mb-5 mt-9 flex items-center justify-between">
                     <div>
                         <h2 className="text-xl font-bold text-[#573323]">
-                            Available Pandits
+                            {pujaId ? "Pandits for Your Selected Puja" : "Available Pandits"}
                         </h2>
                         <p className="mt-1 text-sm text-[#947969]">
                             {loading
@@ -482,7 +677,7 @@ export default function PanditsPage() {
                                                 disabled={authLoading}
                                                 className="flex items-center justify-center gap-2 rounded-xl bg-[#8b472e] px-3 py-3 text-sm font-semibold text-white transition hover:bg-[#713923] disabled:opacity-50"
                                             >
-                                                View Services
+                                                {pujaId ? "Book This Pandit" : "View Services"}
                                                 <ArrowRight size={16} />
                                             </button>
                                         </div>
@@ -490,17 +685,7 @@ export default function PanditsPage() {
 
 
 
-                                        {/* <button
-                                            type="button"
-                                            onClick={() =>
-                                                openPanditServices(pandit)
-                                            }
-                                            disabled={authLoading}
-                                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#8b472e] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#713923] disabled:opacity-50"
-                                        >
-                                            View Services & Book
-                                            <ArrowRight size={16} />
-                                        </button> */}
+
                                     </div>
                                 </article>
                             );
@@ -516,7 +701,7 @@ export default function PanditsPage() {
                         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#eadfd4] bg-[#fffdfb] p-5">
                             <div>
                                 <p className="text-xs font-bold uppercase tracking-wider text-[#a66a48]">
-                                    BOOK A SERVICE
+                                    {pujaId ? "BOOK A PUJA" : "BOOK A SERVICE"}
                                 </p>
                                 <h2 className="mt-1 text-xl font-bold text-[#573323]">
                                     {selectedPandit.name ||
@@ -579,92 +764,96 @@ export default function PanditsPage() {
                             ) : (
                                 <>
                                     {/* Services */}
-                                    <section>
-                                        <h3 className="font-bold text-[#573323]">
-                                            1. Select a Service
-                                        </h3>
+                                    {!pujaId && (
+                                        <section>
+                                            <h3 className="font-bold text-[#573323]">
+                                                1. Select a Service
+                                            </h3>
 
-                                        {servicesLoading ? (
-                                            <div className="flex items-center justify-center py-10 text-sm text-[#947969]">
-                                                <Loader2
-                                                    className="mr-2 animate-spin"
-                                                    size={20}
-                                                />
-                                                Loading services...
-                                            </div>
-                                        ) : services.length === 0 ? (
-                                            <p className="mt-3 rounded-xl bg-[#fff2e8] p-4 text-sm text-[#8b472e]">
-                                                This Pandit has no active
-                                                services available for booking.
-                                            </p>
-                                        ) : (
-                                            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                                                {services.map((service) => (
-                                                    <button
-                                                        type="button"
-                                                        key={service.id}
-                                                        onClick={() =>
-                                                            setSelectedService(
-                                                                service
-                                                            )
-                                                        }
-                                                        className={`rounded-xl border p-4 text-left transition ${selectedService?.id ===
+                                            {servicesLoading ? (
+                                                <div className="flex items-center justify-center py-10 text-sm text-[#947969]">
+                                                    <Loader2
+                                                        className="mr-2 animate-spin"
+                                                        size={20}
+                                                    />
+                                                    Loading services...
+                                                </div>
+                                            ) : services.length === 0 ? (
+                                                <p className="mt-3 rounded-xl bg-[#fff2e8] p-4 text-sm text-[#8b472e]">
+                                                    This Pandit has no active
+                                                    services available for booking.
+                                                </p>
+                                            ) : (
+                                                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                                                    {services.map((service) => (
+                                                        <button
+                                                            type="button"
+                                                            key={service.id}
+                                                            onClick={() =>
+                                                                setSelectedService(
+                                                                    service
+                                                                )
+                                                            }
+                                                            className={`rounded-xl border p-4 text-left transition ${selectedService?.id ===
                                                                 service.id
                                                                 ? "border-[#8b472e] bg-[#fff2e8] ring-2 ring-[#8b472e]/10"
                                                                 : "border-[#eadfd4] bg-white hover:border-[#c69a7e]"
-                                                            }`}
-                                                    >
-                                                        <div className="flex items-start justify-between gap-2">
-                                                            <div>
-                                                                <p className="font-bold text-[#573323]">
-                                                                    {service.service_name}
-                                                                </p>
-                                                                <p className="mt-1 text-xs text-[#947969]">
-                                                                    {service.category}
-                                                                </p>
+                                                                }`}
+                                                        >
+                                                            <div className="flex items-start justify-between gap-2">
+                                                                <div>
+                                                                    <p className="font-bold text-[#573323]">
+                                                                        {service.service_name}
+                                                                    </p>
+                                                                    <p className="mt-1 text-xs text-[#947969]">
+                                                                        {service.category}
+                                                                    </p>
+                                                                </div>
+
+                                                                {selectedService?.id ===
+                                                                    service.id && (
+                                                                        <span className="text-xs font-bold text-[#8b472e]">
+                                                                            Selected
+                                                                        </span>
+                                                                    )}
                                                             </div>
 
-                                                            {selectedService?.id ===
-                                                                service.id && (
-                                                                    <span className="text-xs font-bold text-[#8b472e]">
-                                                                        Selected
-                                                                    </span>
+                                                            <p className="mt-3 flex items-center font-bold text-[#8b472e]">
+                                                                <IndianRupee size={15} />
+                                                                {formatPrice(
+                                                                    service.price
                                                                 )}
-                                                        </div>
+                                                            </p>
 
-                                                        <p className="mt-3 flex items-center font-bold text-[#8b472e]">
-                                                            <IndianRupee size={15} />
-                                                            {formatPrice(
-                                                                service.price
+                                                            {service.duration_minutes && (
+                                                                <p className="mt-1 flex items-center gap-1 text-xs text-[#947969]">
+                                                                    <Clock3 size={13} />
+                                                                    {service.duration_minutes} minutes
+                                                                </p>
                                                             )}
-                                                        </p>
 
-                                                        {service.duration_minutes && (
-                                                            <p className="mt-1 flex items-center gap-1 text-xs text-[#947969]">
-                                                                <Clock3 size={13} />
-                                                                {service.duration_minutes} minutes
-                                                            </p>
-                                                        )}
+                                                            {service.description && (
+                                                                <p className="mt-2 line-clamp-2 text-xs text-[#947969]">
+                                                                    {service.description}
+                                                                </p>
+                                                            )}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </section>
 
-                                                        {service.description && (
-                                                            <p className="mt-2 line-clamp-2 text-xs text-[#947969]">
-                                                                {service.description}
-                                                            </p>
-                                                        )}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </section>
+                                    )}
 
                                     {/* Booking form */}
-                                    {selectedService && (
+                                    {(pujaId || selectedService) && (
                                         <form
                                             onSubmit={handleBookingSubmit}
                                             className="space-y-4 border-t border-[#eadfd4] pt-5"
                                         >
+
                                             <h3 className="font-bold text-[#573323]">
-                                                2. Booking Details
+                                                {pujaId ? "1. Puja Booking Details" : "2. Booking Details"}
                                             </h3>
 
                                             {bookingError && (
@@ -762,14 +951,19 @@ export default function PanditsPage() {
                                                 </label>
                                             </div>
 
-                                            <div className="flex items-center justify-between rounded-xl bg-[#fff2e8] p-4">
-                                                <span className="text-sm font-semibold text-[#705647]">
-                                                    Service Amount
-                                                </span>
-                                                <span className="text-lg font-bold text-[#8b472e]">
-                                                    {formatPrice(selectedService.price)}
-                                                </span>
-                                            </div>
+
+                                            {!pujaId && selectedService && (
+                                                <div className="flex items-center justify-between rounded-xl bg-[#fff2e8] p-4">
+                                                    <span className="text-sm font-semibold text-[#705647]">
+                                                        Service Amount
+                                                    </span>
+
+                                                    <span className="text-lg font-bold text-[#8b472e]">
+                                                        {formatPrice(selectedService.price)}
+                                                    </span>
+                                                </div>
+                                            )}
+
 
                                             <p className="text-xs leading-5 text-[#947969]">
                                                 This request will be sent to

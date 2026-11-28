@@ -44,8 +44,6 @@ export default function PanditProfilePage() {
 
                 console.log("Rest", response);
 
-
-
                 const profile =
                     response?.data?.data ||
                     response?.data ||

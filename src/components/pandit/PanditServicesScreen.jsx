@@ -19,7 +19,6 @@ import {
 import { addPanditService, getPanditServices, updatePanditService, updatePanditServiceStatus } from "@/services/panditService";
 
 
-
 const INITIAL_FORM = {
     service_name: "",
     category: "",
@@ -30,8 +29,7 @@ const INITIAL_FORM = {
     location: "",
 };
 
-const INPUT_CLASS =
-    "mt-2 w-full rounded-xl border border-[#e8ddce] bg-white px-4 py-3 text-sm text-[#573323] outline-none transition focus:border-[#a66a48] focus:ring-2 focus:ring-[#a66a48]/10";
+const INPUT_CLASS = "mt-2 w-full rounded-xl border border-[#e8ddce] bg-white px-4 py-3 text-sm text-[#573323] outline-none transition focus:border-[#a66a48] focus:ring-2 focus:ring-[#a66a48]/10";
 
 const LABEL_CLASS = "text-sm font-semibold text-[#705647]";
 
@@ -43,13 +41,13 @@ function formatPrice(value) {
     }).format(Number(value || 0));
 }
 
+
 export default function PanditServicesScreen() {
     const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
     const [statusId, setStatusId] = useState(null);
-
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [form, setForm] = useState(INITIAL_FORM);
@@ -57,6 +55,7 @@ export default function PanditServicesScreen() {
     const [filter, setFilter] = useState("all");
     const [error, setError] = useState("");
 
+    
     const fetchServices = useCallback(async () => {
         try {
             setLoading(true);
@@ -432,11 +431,10 @@ export default function PanditServicesScreen() {
                                 </div>
 
                                 <span
-                                    className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
-                                        service.status === "active"
+                                    className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${service.status === "active"
                                             ? "bg-green-50 text-green-700"
                                             : "bg-gray-100 text-gray-600"
-                                    }`}
+                                        }`}
                                 >
                                     {service.status}
                                 </span>

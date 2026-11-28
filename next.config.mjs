@@ -1,12 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  reactStrictMode: false,
+
   experimental: {
     agentFeedback: true,
   },
+
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+
   turbopack: {
     rules: {
       "*.css": {
@@ -18,3 +21,27 @@ const nextConfig = {
 };
 
 export default nextConfig;
+
+
+
+
+// /** @type {import('next').NextConfig} */
+// const nextConfig = {
+//   /* config options here */
+//   experimental: {
+//     agentFeedback: true,
+//   },
+//   cacheComponents: true,
+//   partialPrefetching: true,
+//   reactCompiler: true,
+//   turbopack: {
+//     rules: {
+//       "*.css": {
+//         loaders: ["@tailwindcss/turbopack"],
+//         as: "*.css",
+//       },
+//     },
+//   },
+// };
+
+// export default nextConfig;

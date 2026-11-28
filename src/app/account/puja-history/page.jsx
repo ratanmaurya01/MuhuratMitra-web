@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Search,
     CalendarDays,
@@ -10,74 +9,56 @@ import {
     History,
     ChevronRight,
     Filter,
+    Loader2,
+    MapPin,
 } from "lucide-react";
+
 import { FILTERS } from "@/constants/filter";
+import { getDevoteeBookings } from "@/services/bookingService";
 
 
-const PUJA_HISTORY = [
-    {
-        id: 1,
-        name: "Naamkaran Sanskar",
-        pandit: "Vidwan Subramanian Iyer",
-        date: "18 Nov 2026",
-        time: "09:00 AM – 11:00 AM",
-        amount: 3400,
-        status: "Completed",
-        bookingId: "MM-PUJA-1001",
-        location: "Jaipur, Rajasthan",
-        payment: "Paid",
-    },
-    {
-        id: 2,
-        name: "Ganesh Lakshmi Puja",
-        pandit: "Pt. Harshvardhan Trivedi",
-        date: "09 Nov 2026",
-        time: "04:00 PM – 06:00 PM",
-        amount: 2200,
-        status: "Cancelled",
-        bookingId: "MM-PUJA-1002",
-        location: "Jaipur, Rajasthan",
-        payment: "Refunded",
-    },
-    {
-        id: 3,
-        name: "Maha Rudrabhishek Puja",
-        pandit: "Acharya Raghavendra Sharma",
-        date: "02 Nov 2026",
-        time: "06:30 AM – 08:30 AM",
-        amount: 2500,
-        status: "Completed",
-        bookingId: "MM-PUJA-1003",
-        location: "Varanasi, Uttar Pradesh",
-        payment: "Paid",
-    },
-    {
-        id: 4,
-        name: "Navgraha Shanti Havan",
-        pandit: "Acharya Vinayak Deshmukh",
-        date: "19 Oct 2026",
-        time: "10:00 AM – 12:00 PM",
-        amount: 2700,
-        status: "Completed",
-        bookingId: "MM-PUJA-1004",
-        location: "Jaipur, Rajasthan",
-        payment: "Paid",
-    },
-];
+function formatDate(date) {
+    if (!date) return "Date not available";
 
+    return new Date(date).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    });
+}
+
+function formatTime(time) {
+    if (!time) return "Time not available";
+
+    const [hours, minutes] = String(time).split(":");
+    const date = new Date();
+
+    date.setHours(Number(hours), Number(minutes), 0);
+
+    return date.toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
 
 function StatusBadge({ status }) {
     const styles = {
-        Completed: "bg-[#ffeadc] text-[#bd6439]",
-        Cancelled: "bg-[#f9e6e3] text-[#a73f3b]",
+        completed: "bg-[#ffeadc] text-[#bd6439]",
+        cancelled: "bg-[#f9e6e3] text-[#a73f3b]",
+        rejected: "bg-[#f9e6e3] text-[#a73f3b]",
+        accepted: "bg-[#e5f3e8] text-[#39754d]",
+        pending: "bg-[#fff4d8] text-[#a47722]",
     };
+
+    const value = status || "pending";
 
     return (
         <span
-            className={`rounded-full px-3 py-1.5 text-xs font-medium ${styles[status] || "bg-[#f4eee6] text-[#78665a]"
+            className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize ${styles[value.toLowerCase()] ||
+                "bg-[#f4eee6] text-[#78665a]"
                 }`}
         >
-            {status}
+            {value}
         </span>
     );
 }
@@ -88,30 +69,29 @@ function PujaCard({ puja }) {
     return (
         <article className="overflow-hidden rounded-[24px] border border-[#e6ddce] bg-white shadow-[0_3px_12px_rgba(70,45,25,0.045)]">
             <div className="p-5 sm:p-6">
-                {/* Puja details */}
                 <div className="flex items-start gap-3">
                     <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-[#f7e5e3] text-[#843f3b]">
-                        <Flower2 size={27} strokeWidth={1.8} />
+                        <Flower2 size={27} />
                     </div>
 
                     <div className="min-w-0 flex-1">
                         <h3 className="font-display text-xl text-[#39251d]">
-                            {puja.name}
+                            {puja.puja_name || `Puja #${puja.puja_id}`}
                         </h3>
 
                         <p className="mt-1 text-sm text-[#82736b]">
-                            {puja.pandit}
+                            {puja.pandit_name || "Pandit"}
                         </p>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[#82736b]">
+                        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm text-[#82736b]">
                             <span className="flex items-center gap-1.5">
                                 <CalendarDays size={16} className="text-[#bd6439]" />
-                                {puja.date}
+                                {formatDate(puja.booking_date)}
                             </span>
 
                             <span className="flex items-center gap-1.5">
                                 <Clock3 size={16} className="text-[#bd6439]" />
-                                {puja.time}
+                                {formatTime(puja.booking_time)}
                             </span>
                         </div>
                     </div>
@@ -120,12 +100,11 @@ function PujaCard({ puja }) {
                         <StatusBadge status={puja.status} />
 
                         <p className="font-display text-xl text-[#713c32]">
-                            ₹{puja.amount.toLocaleString("en-IN")}
+                            ₹{Number(puja.service_price || 0).toLocaleString("en-IN")}
                         </p>
                     </div>
                 </div>
 
-                {/* Details button */}
                 <button
                     type="button"
                     onClick={() => setExpanded((prev) => !prev)}
@@ -142,33 +121,25 @@ function PujaCard({ puja }) {
 
                 {expanded && (
                     <div className="mt-3 space-y-3 rounded-xl bg-[#fcf5eb] p-4 text-sm">
-                        <div className="flex justify-between gap-3">
-                            <span className="text-[#82736b]">Booking ID</span>
-                            <span className="font-medium text-[#39251d]">
-                                {puja.bookingId}
-                            </span>
-                        </div>
+                        <DetailRow
+                            label="Booking ID"
+                            value={puja.booking_number || `#${puja.id}`}
+                        />
 
-                        <div className="flex justify-between gap-3">
-                            <span className="text-[#82736b]">Location</span>
-                            <span className="text-right text-[#39251d]">
-                                {puja.location}
-                            </span>
-                        </div>
+                        <DetailRow
+                            label="Location"
+                            value={[puja.address, puja.city].filter(Boolean).join(", ") || "Not provided"}
+                        />
 
-                        <div className="flex justify-between gap-3">
-                            <span className="text-[#82736b]">Payment</span>
-                            <span className="font-medium text-[#39251d]">
-                                {puja.payment}
-                            </span>
-                        </div>
+                        <DetailRow
+                            label="Payment"
+                            value={puja.payment_status || "Pending"}
+                        />
 
-                        <div className="flex justify-between gap-3">
-                            <span className="text-[#82736b]">Amount</span>
-                            <span className="font-semibold text-[#713c32]">
-                                ₹{puja.amount.toLocaleString("en-IN")}
-                            </span>
-                        </div>
+                        <DetailRow
+                            label="Amount"
+                            value={`₹${Number(puja.service_price || 0).toLocaleString("en-IN")}`}
+                        />
                     </div>
                 )}
             </div>
@@ -176,37 +147,72 @@ function PujaCard({ puja }) {
     );
 }
 
+function DetailRow({ label, value }) {
+    return (
+        <div className="flex justify-between gap-3">
+            <span className="text-[#82736b]">{label}</span>
+            <span className="text-right font-medium text-[#39251d]">
+                {value}
+            </span>
+        </div>
+    );
+}
+
 export default function PujaHistoryPage() {
+    const [bookings, setBookings] = useState([]);
     const [activeFilter, setActiveFilter] = useState("All");
     const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        fetchPujaHistory();
+    }, []);
+
+    const fetchPujaHistory = async () => {
+        try {
+            setLoading(true);
+            setError("");
+            const response = await getDevoteeBookings("puja");
+            const allBookings = Array.isArray(response) ? response : [];
+            setBookings(allBookings);
+
+        } catch (err) {
+            console.error("Puja history error:", err);
+            setError("Unable to load puja history. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const filteredPujas = useMemo(() => {
-        return PUJA_HISTORY.filter((puja) => {
+        return bookings.filter((puja) => {
             const matchesFilter =
-                activeFilter === "All" || puja.status === activeFilter;
+                activeFilter === "All" ||
+                puja.status?.toLowerCase() === activeFilter.toLowerCase();
 
             const query = search.toLowerCase();
 
             const matchesSearch =
-                puja.name.toLowerCase().includes(query) ||
-                puja.pandit.toLowerCase().includes(query) ||
-                puja.bookingId.toLowerCase().includes(query);
+                (puja.puja_name || "").toLowerCase().includes(query) ||
+                (puja.pandit_name || "").toLowerCase().includes(query) ||
+                (puja.booking_number || "").toLowerCase().includes(query);
 
             return matchesFilter && matchesSearch;
         });
-    }, [activeFilter, search]);
+    }, [bookings, activeFilter, search]);
 
-    const completedCount = PUJA_HISTORY.filter(
-        (p) => p.status === "Completed"
+    const completedCount = bookings.filter(
+        (p) => p.status?.toLowerCase() === "completed"
     ).length;
 
-    const cancelledCount = PUJA_HISTORY.filter(
-        (p) => p.status === "Cancelled"
+    const cancelledCount = bookings.filter(
+        (p) =>
+            ["cancelled", "rejected"].includes(p.status?.toLowerCase())
     ).length;
 
     return (
         <div className="min-w-0 space-y-7">
-            {/* Heading */}
             <div>
                 <p className="text-xs font-semibold tracking-widest text-[#bd6439]">
                     MY ACCOUNT / PUJA HISTORY
@@ -217,44 +223,31 @@ export default function PujaHistoryPage() {
                 </h1>
 
                 <p className="mt-2 text-sm leading-6 text-[#82736b]">
-                    View all your past ceremonies, Pandit details and booking records.
+                    View your past ceremonies, Pandit details and booking records.
                 </p>
             </div>
 
-            {/* Summary */}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-[#e6ddce] bg-white p-4">
-                    <History size={21} className="text-[#bd6439]" />
-                    <p className="mt-3 text-sm text-[#82736b]">
-                        Total Ceremonies
-                    </p>
-                    <h2 className="mt-1 font-display text-3xl text-[#39251d]">
-                        {PUJA_HISTORY.length}
-                    </h2>
-                </div>
+                <SummaryCard
+                    icon={<History size={21} />}
+                    label="Total Ceremonies"
+                    value={bookings.length}
+                />
 
-                <div className="rounded-2xl border border-[#e6ddce] bg-white p-4">
-                    <Flower2 size={21} className="text-[#39754d]" />
-                    <p className="mt-3 text-sm text-[#82736b]">
-                        Completed
-                    </p>
-                    <h2 className="mt-1 font-display text-3xl text-[#39754d]">
-                        {completedCount}
-                    </h2>
-                </div>
+                <SummaryCard
+                    icon={<Flower2 size={21} />}
+                    label="Completed"
+                    value={completedCount}
+                />
 
-                <div className="col-span-2 rounded-2xl border border-[#e6ddce] bg-white p-4 sm:col-span-1">
-                    <CalendarDays size={21} className="text-[#a73f3b]" />
-                    <p className="mt-3 text-sm text-[#82736b]">
-                        Cancelled
-                    </p>
-                    <h2 className="mt-1 font-display text-3xl text-[#a73f3b]">
-                        {cancelledCount}
-                    </h2>
-                </div>
+                <SummaryCard
+                    icon={<CalendarDays size={21} />}
+                    label="Cancelled"
+                    value={cancelledCount}
+                    className="col-span-2 sm:col-span-1"
+                />
             </div>
 
-            {/* Search */}
             <div className="relative">
                 <Search
                     size={19}
@@ -266,11 +259,10 @@ export default function PujaHistoryPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search puja, Pandit or booking ID..."
-                    className="h-12 w-full rounded-full border border-[#e6ddce] bg-white pl-12 pr-4 text-sm text-[#39251d] outline-none transition placeholder:text-[#aa9b90] focus:border-[#bd6439]"
+                    className="h-12 w-full rounded-full border border-[#e6ddce] bg-white pl-12 pr-4 text-sm outline-none focus:border-[#bd6439]"
                 />
             </div>
 
-            {/* Filters */}
             <div>
                 <div className="mb-4 flex items-center gap-2 text-sm text-[#82736b]">
                     <Filter size={17} />
@@ -281,8 +273,12 @@ export default function PujaHistoryPage() {
                     {FILTERS.map((filter) => {
                         const count =
                             filter === "All"
-                                ? PUJA_HISTORY.length
-                                : PUJA_HISTORY.filter((p) => p.status === filter).length;
+                                ? bookings.length
+                                : bookings.filter(
+                                    (p) =>
+                                        p.status?.toLowerCase() ===
+                                        filter.toLowerCase()
+                                ).length;
 
                         return (
                             <button
@@ -290,8 +286,8 @@ export default function PujaHistoryPage() {
                                 type="button"
                                 onClick={() => setActiveFilter(filter)}
                                 className={`shrink-0 rounded-full border px-5 py-2.5 text-sm font-medium transition ${activeFilter === filter
-                                        ? "border-[#f3dfd8] bg-[#f8e7e5] text-[#843f3b]"
-                                        : "border-[#e6ddce] bg-white text-[#82736b] hover:bg-[#fff6ed]"
+                                    ? "border-[#f3dfd8] bg-[#f8e7e5] text-[#843f3b]"
+                                    : "border-[#e6ddce] bg-white text-[#82736b]"
                                     }`}
                             >
                                 {filter} ({count})
@@ -301,7 +297,6 @@ export default function PujaHistoryPage() {
                 </div>
             </div>
 
-            {/* List heading */}
             <div className="flex items-center justify-between">
                 <h2 className="font-display text-2xl text-[#39251d]">
                     Past Ceremonies
@@ -312,39 +307,67 @@ export default function PujaHistoryPage() {
                 </span>
             </div>
 
-            {/* Cards */}
-            <div className="space-y-4">
-                {filteredPujas.map((puja) => (
-                    <PujaCard key={puja.id} puja={puja} />
-                ))}
+            {loading ? (
+                <div className="flex items-center justify-center rounded-2xl border border-[#e6ddce] bg-white py-16">
+                    <Loader2 className="animate-spin text-[#bd6439]" size={28} />
+                    <span className="ml-3 text-sm text-[#82736b]">
+                        Loading puja history...
+                    </span>
+                </div>
+            ) : error ? (
+                <div className="rounded-2xl border border-red-200 bg-white p-8 text-center">
+                    <p className="text-sm text-red-600">{error}</p>
+                    <button
+                        onClick={fetchBookings}
+                        className="mt-4 text-sm font-medium text-[#bd6439]"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            ) : filteredPujas.length > 0 ? (
+                <div className="space-y-4">
+                    {filteredPujas.map((puja) => (
+                        <PujaCard key={puja.id} puja={puja} />
+                    ))}
+                </div>
+            ) : (
+                <div className="rounded-[24px] border border-[#e6ddce] bg-white px-5 py-12 text-center">
+                    <Flower2
+                        size={35}
+                        className="mx-auto mb-3 text-[#bd6439]"
+                    />
 
-                {filteredPujas.length === 0 && (
-                    <div className="rounded-[24px] border border-[#e6ddce] bg-white px-5 py-12 text-center">
-                        <Flower2
-                            size={35}
-                            className="mx-auto mb-3 text-[#bd6439]"
-                        />
+                    <h3 className="font-display text-xl text-[#39251d]">
+                        No ceremonies found
+                    </h3>
 
-                        <h3 className="font-display text-xl text-[#39251d]">
-                            No ceremonies found
-                        </h3>
+                    <p className="mt-2 text-sm text-[#82736b]">
+                        Your Puja bookings will appear here.
+                    </p>
 
-                        <p className="mt-2 text-sm text-[#82736b]">
-                            Try changing your filter or search.
-                        </p>
+                    <button
+                        onClick={() => {
+                            setActiveFilter("All");
+                            setSearch("");
+                        }}
+                        className="mt-4 text-sm font-medium text-[#bd6439]"
+                    >
+                        Clear Filters
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}
 
-                        <button
-                            onClick={() => {
-                                setActiveFilter("All");
-                                setSearch("");
-                            }}
-                            className="mt-4 text-sm font-medium text-[#bd6439]"
-                        >
-                            Clear Filters
-                        </button>
-                    </div>
-                )}
-            </div>
+function SummaryCard({ icon, label, value, className = "" }) {
+    return (
+        <div className={`rounded-2xl border border-[#e6ddce] bg-white p-4 ${className}`}>
+            <div className="text-[#bd6439]">{icon}</div>
+            <p className="mt-3 text-sm text-[#82736b]">{label}</p>
+            <h2 className="mt-1 font-display text-3xl text-[#39251d]">
+                {value}
+            </h2>
         </div>
     );
 }

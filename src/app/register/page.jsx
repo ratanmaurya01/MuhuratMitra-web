@@ -96,7 +96,7 @@ export default function RegisterPage() {
   const [submitError, setSubmitError] = useState("");
 
   const { register: createAccount } = useAuth();
-  
+
   const {
     register,
     handleSubmit,
@@ -141,13 +141,35 @@ export default function RegisterPage() {
     <div className="min-h-[calc(100vh-5rem)] bg-background">
       <div className="grid min-h-[calc(100vh-5rem)] lg:grid-cols-2">
         {/* Left Branding Section */}
-        <section className="relative hidden overflow-hidden bg-primary px-10 py-16 text-primary-foreground lg:flex lg:flex-col lg:justify-between xl:px-20">
-          <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full border border-primary-foreground/10" />
-          <div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full border border-primary-foreground/10" />
 
+
+
+
+        <section className="relative hidden min-h-screen overflow-hidden px-10 py-16 text-white lg:flex lg:flex-col lg:justify-between xl:px-20">
+
+          {/* Background Image */}
+          <div className="absolute inset-0">
+            <img
+              src="/images/muhurat-login.png"
+              alt="Indian temple at sunrise"
+              className="h-full w-full object-cover object-center"
+            />
+
+            {/* Saffron Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#e95b0b]/45 via-[#e95b0b]/30 to-[#873515]/50" />
+
+            {/* Bottom Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#54200e]/35 via-transparent to-transparent" />
+          </div>
+
+          {/* Decorative Circles */}
+          <div className="absolute -right-32 -top-32 z-[1] h-96 w-96 rounded-full border border-white/20" />
+          <div className="absolute -bottom-40 -left-32 z-[1] h-96 w-96 rounded-full border border-white/20" />
+
+          {/* Logo */}
           <div className="relative z-10">
             <Link href="/" className="inline-flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-foreground/15">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/15 backdrop-blur-md">
                 <Sparkles size={26} />
               </div>
 
@@ -157,25 +179,28 @@ export default function RegisterPage() {
             </Link>
           </div>
 
+          {/* Main Content */}
           <div className="relative z-10 max-w-xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-2 text-sm">
+
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-sm backdrop-blur-md">
               <Sparkles size={15} />
               Begin Your Spiritual Journey
             </div>
 
             <h1 className="text-4xl font-bold leading-tight xl:text-5xl">
               Create your account and bring
-              <span className="block text-primary-foreground/75">
+              <span className="block text-white/80">
                 positivity into every beginning.
               </span>
             </h1>
 
-            <p className="mt-6 max-w-md text-base leading-7 text-primary-foreground/75">
+            <p className="mt-6 max-w-md text-base leading-7 text-white/85">
               Discover auspicious Muhurat, explore daily Panchang,
               book trusted Pandits and manage your important
               religious occasions in one place.
             </p>
 
+            {/* Features */}
             <div className="mt-10 space-y-5">
               {[
                 {
@@ -194,14 +219,19 @@ export default function RegisterPage() {
                   description: "Manage your bookings in one place.",
                 },
               ].map((item) => (
-                <div key={item.title} className="flex items-center gap-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-foreground/15">
+                <div
+                  key={item.title}
+                  className="flex items-center gap-4 rounded-xl border border-white/20 bg-white/10 p-3 backdrop-blur-md transition hover:bg-white/20"
+                >
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15">
                     <item.icon size={21} />
                   </div>
 
                   <div>
-                    <h3 className="font-semibold">{item.title}</h3>
-                    <p className="mt-1 text-sm text-primary-foreground/70">
+                    <h3 className="font-semibold">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-white/75">
                       {item.description}
                     </p>
                   </div>
@@ -210,9 +240,10 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* <p className="relative z-10 text-sm text-primary-foreground/60">
+          {/* Footer */}
+          <p className="relative z-10 text-xs text-white/70">
             © {new Date().getFullYear()} MuhuratMitra. All rights reserved.
-          </p> */}
+          </p>
         </section>
 
         {/* Registration Form */}
@@ -245,8 +276,6 @@ export default function RegisterPage() {
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-
-
               <div className="space-y-3">
                 <label className="text-sm font-medium text-foreground">
                   Select Account Type

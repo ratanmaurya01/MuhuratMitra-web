@@ -91,21 +91,7 @@ function getScore(seed) {
   return 55 + (seededNumber(seed, 0) % 46);
 }
 
-/**
- * MOCK MUHURAT ENGINE
- *
- * TODO:
- * Replace this deterministic mock calculation with a real,
- * location-aware Panchang calculation/API.
- *
- * Real calculation should consider:
- * - Sunrise and sunset
- * - Tithi and Nakshatra transitions
- * - Yoga and Karana
- * - Rahu Kaal, Yamaganda and Gulika
- * - Local timezone and geographical coordinates
- * - Event-specific Muhurat rules
- */
+
 export function getMuhuratResult({ event, date, city }) {
   if (!event || !date || !city) {
     throw new Error("Event, date and city are required.");
@@ -168,21 +154,17 @@ export function getMuhuratDateComparisons({ event, city, startDate, endDate }) {
     return [];
   }
 
-  const dayDifference = Math.floor(
-    (end.getTime() - start.getTime()) / 86400000
-  );
+  const dayDifference = Math.floor((end.getTime() - start.getTime()) / 86400000);
 
   if (dayDifference > 29) {
     throw new Error("Date range cannot exceed 30 days.");
   }
-
   const results = [];
 
   for (let offset = 0; offset <= dayDifference; offset += 1) {
     const date = new Date(start.getTime() + offset * 86400000)
       .toISOString()
       .slice(0, 10);
-
     results.push(getMuhuratResult({ event, date, city }));
   }
 

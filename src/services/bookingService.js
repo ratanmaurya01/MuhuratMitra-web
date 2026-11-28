@@ -15,12 +15,24 @@ export const submitBooking = (data) =>
     });
 
 
-export const getMyBookings = () =>
-    apiCall({
-        endpoint: "/bookings/my-bookings",
+// export const getMyBookings = () =>
+//     apiCall({
+//         endpoint: "/bookings/my-bookings",
+//         method: "GET",
+//     });
+
+export const getDevoteeBookings = async (bookingType = "") => {
+    const query = bookingType
+        ? `?booking_type=${encodeURIComponent(bookingType)}`
+        : "";
+
+    const response = await apiCall({
+        endpoint: `/bookings/my-bookings${query}`,
         method: "GET",
     });
 
+    return response?.data || null;
+};
 
 
 export const getPanditBookings = () =>

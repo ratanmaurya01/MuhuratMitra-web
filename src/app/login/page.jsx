@@ -58,7 +58,7 @@ export default function LoginPage() {
       router.replace(getRedirectPath(user));
     }
   }, [loading, isAuthenticated, user, getRedirectPath, router]);
-  
+
   const onSubmit = async (values) => {
     setIsSubmitting(true);
     setLoginError("");
@@ -83,7 +83,111 @@ export default function LoginPage() {
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl lg:grid-cols-2">
 
         {/* Left Branding Section */}
-        <section className="relative hidden overflow-hidden bg-primary p-12 text-primary-foreground lg:flex lg:flex-col lg:justify-between xl:p-16">
+
+
+        {/* Left Branding Section */}
+        <section className="relative hidden min-h-screen overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
+
+          {/* Background Image */}
+          <div className="absolute inset-0">
+
+            <img
+              src="/images/muhurat-login.png"
+              alt="Indian temple at sunrise"
+              className="h-full w-full object-cover object-center"
+            />
+
+            <div className="absolute inset-0 bg-gradient-to-br from-[#e95b0b]/45 via-[#e95b0b]/30 to-[#873515]/50" />
+
+            <div className="absolute inset-0 bg-gradient-to-t from-[#54200e]/30 via-transparent to-transparent" />
+
+
+          </div>
+
+          {/* Decorative circles */}
+          <div className="absolute -right-28 -top-28 z-[1] size-96 rounded-full border border-white/20" />
+          <div className="absolute -bottom-40 -left-32 z-[1] size-[30rem] rounded-full border border-white/20" />
+
+          {/* Logo */}
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="flex size-12 items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-md">
+              <Flower2 size={27} />
+            </div>
+
+            <div>
+              <p className="text-xl font-bold tracking-tight">
+                MuhuratMitra
+              </p>
+              <p className="text-xs text-white/80">
+                Your Spiritual Companion
+              </p>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="relative z-10 max-w-lg">
+
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-sm backdrop-blur-md">
+              <Sparkles size={16} />
+              Discover auspicious moments
+            </div>
+
+            <h1 className="text-4xl font-bold leading-tight xl:text-5xl">
+              Bring positivity
+              <br />
+              into every
+              <br />
+              <span className="text-white/80">
+                new beginning.
+              </span>
+            </h1>
+
+            <p className="mt-6 max-w-md text-base leading-7 text-white/85">
+              Discover daily Panchang, find auspicious Muhurat,
+              book trusted Pandits and celebrate every special
+              occasion with confidence.
+            </p>
+
+            {/* Feature Cards */}
+            <div className="mt-10 grid grid-cols-2 gap-4">
+
+              <div className="rounded-xl border border-white/25 bg-white/15 p-4 backdrop-blur-md transition hover:bg-white/20">
+                <ShieldCheck size={22} />
+
+                <p className="mt-3 font-semibold">
+                  Trusted Pandits
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-white/75">
+                  Connect with experienced priests
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-white/25 bg-white/15 p-4 backdrop-blur-md transition hover:bg-white/20">
+                <Sparkles size={22} />
+
+                <p className="mt-3 font-semibold">
+                  Shubh Muhurat
+                </p>
+
+                <p className="mt-1 text-xs leading-5 text-white/75">
+                  Find the right time for every occasion
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <p className="relative z-10 text-xs text-white/70">
+            © 2026 MuhuratMitra. All rights reserved.
+          </p>
+
+        </section>
+
+
+
+        {/* <section className="relative hidden overflow-hidden bg-primary p-12 text-primary-foreground lg:flex lg:flex-col lg:justify-between xl:p-16">
           <div className="absolute -right-28 -top-28 size-96 rounded-full border border-white/10" />
           <div className="absolute -bottom-40 -left-32 size-[30rem] rounded-full border border-white/10" />
 
@@ -146,7 +250,7 @@ export default function LoginPage() {
           <p className="relative z-10 text-xs text-primary-foreground/60">
             © 2026 MuhuratMitra. All rights reserved.
           </p>
-        </section>
+        </section> */}
 
         {/* Right Login Section */}
         <section className="flex items-center justify-center px-4 py-12 sm:px-8 lg:px-12">
